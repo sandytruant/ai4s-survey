@@ -10,43 +10,88 @@ const SURVEY_TREE = [
   {
     title: "1. Electronic Structure",
     pillar: "01_electronic_structure",
-    items: [
-      { label: "1.1 Problem Overview", path: "01_electronic_structure/1_scientific_problem/1.1_problem_overview.html" },
-      { label: "1.2 Classical Bottlenecks", path: "01_electronic_structure/1_scientific_problem/1.2_classical_methods_and_bottlenecks.html" },
-      { label: "1.3 Compute Demand & Impact", path: "01_electronic_structure/1_scientific_problem/1.3_compute_demand_and_impact.html" },
-      { label: "2.1 AI4S Landscape", path: "01_electronic_structure/2_ai4s_methods/2.1_landscape_overview.html" },
-      { label: "2.2 FermiNet & Psiformer", path: "01_electronic_structure/2_ai4s_methods/2.2_representative_methods/ferminet_psiformer.html" },
-      { label: "2.2 DeepH-E3", path: "01_electronic_structure/2_ai4s_methods/2.2_representative_methods/deeph_e3.html" },
-      { label: "2.2 QHNet", path: "01_electronic_structure/2_ai4s_methods/2.2_representative_methods/qhnet.html" },
-      { label: "2.2 DM21 & Skala", path: "01_electronic_structure/2_ai4s_methods/2.2_representative_methods/dm21_skala.html" },
+    sections: [
+      {
+        label: "1. Scientific Problem",
+        items: [
+          { label: "1.1 Problem Overview", path: "01_electronic_structure/1_scientific_problem/1.1_problem_overview.html" },
+          { label: "1.2 Classical Bottlenecks", path: "01_electronic_structure/1_scientific_problem/1.2_classical_methods_and_bottlenecks.html" },
+          { label: "1.3 Compute Demand & Impact", path: "01_electronic_structure/1_scientific_problem/1.3_compute_demand_and_impact.html" },
+        ],
+      },
+      {
+        label: "2. AI4S Methods",
+        items: [
+          { label: "2.1 Landscape Overview", path: "01_electronic_structure/2_ai4s_methods/2.1_landscape_overview.html" },
+        ],
+        subsection: {
+          label: "2.2 Representative Methods",
+          items: [
+            { label: "2.2.1 FermiNet & Psiformer", path: "01_electronic_structure/2_ai4s_methods/2.2_representative_methods/ferminet_psiformer.html" },
+            { label: "2.2.2 DeepH-E3", path: "01_electronic_structure/2_ai4s_methods/2.2_representative_methods/deeph_e3.html" },
+            { label: "2.2.3 QHNet", path: "01_electronic_structure/2_ai4s_methods/2.2_representative_methods/qhnet.html" },
+            { label: "2.2.4 DM21 & Skala", path: "01_electronic_structure/2_ai4s_methods/2.2_representative_methods/dm21_skala.html" },
+          ],
+        },
+      },
     ],
   },
   {
     title: "2. Molecular Dynamics",
     pillar: "02_molecular_dynamics",
-    items: [
-      { label: "1.1 Problem Overview", path: "02_molecular_dynamics/1_scientific_problem/1.1_problem_overview.html" },
-      { label: "1.2 Classical Bottlenecks", path: "02_molecular_dynamics/1_scientific_problem/1.2_classical_methods_and_bottlenecks.html" },
-      { label: "1.3 Compute Demand & Impact", path: "02_molecular_dynamics/1_scientific_problem/1.3_compute_demand_and_impact.html" },
-      { label: "2.1 AI4S Landscape", path: "02_molecular_dynamics/2_ai4s_methods/2.1_landscape_overview.html" },
-      { label: "2.2 DeePMD-kit", path: "02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/deepmd_kit.html" },
-      { label: "2.2 NequIP & Allegro", path: "02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/nequip_allegro.html" },
-      { label: "2.2 MACE", path: "02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/mace.html" },
-      { label: "2.2 SevenNet", path: "02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/sevennet.html" },
+    sections: [
+      {
+        label: "1. Scientific Problem",
+        items: [
+          { label: "1.1 Problem Overview", path: "02_molecular_dynamics/1_scientific_problem/1.1_problem_overview.html" },
+          { label: "1.2 Classical Bottlenecks", path: "02_molecular_dynamics/1_scientific_problem/1.2_classical_methods_and_bottlenecks.html" },
+          { label: "1.3 Compute Demand & Impact", path: "02_molecular_dynamics/1_scientific_problem/1.3_compute_demand_and_impact.html" },
+        ],
+      },
+      {
+        label: "2. AI4S Methods",
+        items: [
+          { label: "2.1 Landscape Overview", path: "02_molecular_dynamics/2_ai4s_methods/2.1_landscape_overview.html" },
+        ],
+        subsection: {
+          label: "2.2 Representative Methods",
+          items: [
+            { label: "2.2.1 DeePMD-kit", path: "02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/deepmd_kit.html" },
+            { label: "2.2.2 NequIP & Allegro", path: "02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/nequip_allegro.html" },
+            { label: "2.2.3 MACE", path: "02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/mace.html" },
+            { label: "2.2.4 SevenNet", path: "02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/sevennet.html" },
+          ],
+        },
+      },
     ],
   },
   {
     title: "3. Continuum Mechanics PDEs",
     pillar: "03_continuum_mechanics_pde",
-    items: [
-      { label: "1.1 Problem Overview", path: "03_continuum_mechanics_pde/1_scientific_problem/1.1_problem_overview.html" },
-      { label: "1.2 Classical Bottlenecks", path: "03_continuum_mechanics_pde/1_scientific_problem/1.2_classical_methods_and_bottlenecks.html" },
-      { label: "1.3 Compute Demand & Impact", path: "03_continuum_mechanics_pde/1_scientific_problem/1.3_compute_demand_and_impact.html" },
-      { label: "2.1 AI4S Landscape", path: "03_continuum_mechanics_pde/2_ai4s_methods/2.1_landscape_overview.html" },
-      { label: "2.2 PINNs & PhysicsNeMo", path: "03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/pinn_physicsnemo.html" },
-      { label: "2.2 Fourier Neural Operator", path: "03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/fno_neuraloperator.html" },
-      { label: "2.2 MeshGraphNets", path: "03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/meshgraphnets.html" },
-      { label: "2.2 Transolver & Poseidon", path: "03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/transolver_poseidon.html" },
+    sections: [
+      {
+        label: "1. Scientific Problem",
+        items: [
+          { label: "1.1 Problem Overview", path: "03_continuum_mechanics_pde/1_scientific_problem/1.1_problem_overview.html" },
+          { label: "1.2 Classical Bottlenecks", path: "03_continuum_mechanics_pde/1_scientific_problem/1.2_classical_methods_and_bottlenecks.html" },
+          { label: "1.3 Compute Demand & Impact", path: "03_continuum_mechanics_pde/1_scientific_problem/1.3_compute_demand_and_impact.html" },
+        ],
+      },
+      {
+        label: "2. AI4S Methods",
+        items: [
+          { label: "2.1 Landscape Overview", path: "03_continuum_mechanics_pde/2_ai4s_methods/2.1_landscape_overview.html" },
+        ],
+        subsection: {
+          label: "2.2 Representative Methods",
+          items: [
+            { label: "2.2.1 PINNs & PhysicsNeMo", path: "03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/pinn_physicsnemo.html" },
+            { label: "2.2.2 Fourier Neural Operator", path: "03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/fno_neuraloperator.html" },
+            { label: "2.2.3 MeshGraphNets", path: "03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/meshgraphnets.html" },
+            { label: "2.2.4 Transolver & Poseidon", path: "03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/transolver_poseidon.html" },
+          ],
+        },
+      },
     ],
   },
 ];
@@ -67,6 +112,23 @@ function getCurrentRelPath(base) {
   return parts.slice(-(depth + 1)).join("/");
 }
 
+function makeNavList(items, base, currentPath, className = "") {
+  const ul = document.createElement("ul");
+  if (className) ul.className = className;
+  for (const item of items) {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = base + item.path;
+    a.textContent = item.label;
+    if (currentPath === item.path) {
+      a.setAttribute("aria-current", "page");
+    }
+    li.appendChild(a);
+    ul.appendChild(li);
+  }
+  return ul;
+}
+
 function buildSidebarNav(base, currentPath) {
   const nav = document.createElement("nav");
   nav.className = "sidebar-nav";
@@ -77,19 +139,30 @@ function buildSidebarNav(base, currentPath) {
     h2.textContent = group.title;
     nav.appendChild(h2);
 
-    const ul = document.createElement("ul");
-    for (const item of group.items) {
-      const li = document.createElement("li");
-      const a = document.createElement("a");
-      a.href = base + item.path;
-      a.textContent = item.label;
-      if (currentPath === item.path) {
-        a.setAttribute("aria-current", "page");
-      }
-      li.appendChild(a);
-      ul.appendChild(li);
+    if (group.items) {
+      nav.appendChild(makeNavList(group.items, base, currentPath));
     }
-    nav.appendChild(ul);
+
+    if (group.sections) {
+      for (const sec of group.sections) {
+        const secLabel = document.createElement("div");
+        secLabel.className = "sidebar-section-label";
+        secLabel.textContent = sec.label;
+        nav.appendChild(secLabel);
+
+        const ul = makeNavList(sec.items, base, currentPath, "sidebar-sublist");
+        if (sec.subsection) {
+          const subLi = document.createElement("li");
+          const subLabel = document.createElement("div");
+          subLabel.className = "sidebar-section-label";
+          subLabel.textContent = sec.subsection.label;
+          subLi.appendChild(subLabel);
+          subLi.appendChild(makeNavList(sec.subsection.items, base, currentPath, "sidebar-sublist-l3"));
+          ul.appendChild(subLi);
+        }
+        nav.appendChild(ul);
+      }
+    }
   }
   return nav;
 }

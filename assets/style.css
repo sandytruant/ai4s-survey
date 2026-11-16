@@ -330,12 +330,15 @@ body {
 
 /* Sidebar Tree */
 .sidebar-nav h2 {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  margin: 1rem 0 0.4rem;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  margin: 1.15rem 0 0.45rem;
   padding-inline: 0.5rem;
+  padding-block-end: 0.25rem;
+  border-block-end: 1px solid var(--border);
 }
 
 .sidebar-nav h2:first-child {
@@ -352,11 +355,31 @@ body {
   margin-block: 0.1rem;
 }
 
+.sidebar-section-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0.4rem 0.5rem 0.15rem;
+  margin-block-start: 0.25rem;
+}
+
+.sidebar-sublist {
+  margin-inline-start: 0.55rem !important;
+  padding-inline-start: 0.45rem !important;
+  border-inline-start: 1px solid var(--border);
+}
+
+.sidebar-sublist-l3 {
+  margin-inline-start: 0.7rem !important;
+  padding-inline-start: 0.45rem !important;
+  border-inline-start: 1px dashed var(--border);
+}
+
 .sidebar-nav a {
   display: block;
-  padding: 0.34rem 0.55rem;
+  padding: 0.3rem 0.5rem;
   border-radius: 6px;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   color: var(--text-muted);
   text-decoration: none;
   line-height: 1.35;
@@ -373,13 +396,6 @@ body {
   color: var(--primary);
   font-weight: 600;
   border-inline-start-color: var(--primary);
-}
-
-.sidebar-group-title {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text);
-  padding: 0.45rem 0.55rem 0.15rem;
 }
 
 /* Mobile Navigation Drawer (<dialog>) */

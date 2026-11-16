@@ -202,10 +202,15 @@
                 <h3>2. AI4S Methods &amp; Profiling</h3>
                 <ul>
                   <li><a href="01_electronic_structure/2_ai4s_methods/2.1_landscape_overview.html">2.1 Landscape Overview</a> — VMC, Hamiltonian prediction, Neural XC.</li>
-                  <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/ferminet_psiformer.html">2.2 FermiNet &amp; Psiformer</a> — Forward Laplacian (<code>folx</code>), KFAC, JAX/TPU.</li>
-                  <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/deeph_e3.html">2.2 DeepH-E3</a> — Equivariant $H(\mathbf{R})$, 1-shot sparse eigensolve.</li>
-                  <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/qhnet.html">2.2 QHNet</a> — 92% fewer tensor products, Amdahl shift to $HC=SCE$.</li>
-                  <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/dm21_skala.html">2.2 DM21 &amp; Skala</a> — Neural XC inside SCF, <code>GPU4PySCF</code> &amp; <code>GauXC</code>.</li>
+                  <li>
+                    <strong>2.2 Representative Methods</strong>
+                    <ul>
+                      <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/ferminet_psiformer.html">2.2.1 FermiNet &amp; Psiformer</a> — Forward Laplacian (<code>folx</code>), KFAC, JAX/TPU.</li>
+                      <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/deeph_e3.html">2.2.2 DeepH-E3</a> — Equivariant $H(\mathbf{R})$, 1-shot sparse eigensolve.</li>
+                      <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/qhnet.html">2.2.3 QHNet</a> — 92% fewer tensor products, Amdahl shift to $HC=SCE$.</li>
+                      <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/dm21_skala.html">2.2.4 DM21 &amp; Skala</a> — Neural XC inside SCF, <code>GPU4PySCF</code> &amp; <code>GauXC</code>.</li>
+                    </ul>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -230,10 +235,15 @@
                 <h3>2. AI4S Methods &amp; Profiling</h3>
                 <ul>
                   <li><a href="02_molecular_dynamics/2_ai4s_methods/2.1_landscape_overview.html">2.1 Landscape Overview</a> — MLIPs vs. remaining classical neighbor/PME/Verlet kernels.</li>
-                  <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/deepmd_kit.html">2.2 DeePMD-kit</a> — Summit Gordon Bell &amp; Fugaku SC24 scaling, Anton/MDGRAPE context.</li>
-                  <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/nequip_allegro.html">2.2 NequIP &amp; Allegro</a> — Strictly local edge tensor products avoiding halo blowup.</li>
-                  <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/mace.html">2.2 MACE</a> — Higher-body-order ACE contraction &amp; <code>NVIDIA/cuEquivariance</code>.</li>
-                  <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/sevennet.html">2.2 SevenNet</a> — Multi-GPU spatial decomposition &amp; <code>FlashTP</code> fused kernels.</li>
+                  <li>
+                    <strong>2.2 Representative Methods</strong>
+                    <ul>
+                      <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/deepmd_kit.html">2.2.1 DeePMD-kit</a> — Summit Gordon Bell &amp; Fugaku SC24 scaling, Anton/MDGRAPE context.</li>
+                      <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/nequip_allegro.html">2.2.2 NequIP &amp; Allegro</a> — Strictly local edge tensor products avoiding halo blowup.</li>
+                      <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/mace.html">2.2.3 MACE</a> — Higher-body-order ACE contraction &amp; <code>NVIDIA/cuEquivariance</code>.</li>
+                      <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/sevennet.html">2.2.4 SevenNet</a> — Multi-GPU spatial decomposition &amp; <code>FlashTP</code> fused kernels.</li>
+                    </ul>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -258,10 +268,15 @@
                 <h3>2. AI4S Methods &amp; Profiling</h3>
                 <ul>
                   <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.1_landscape_overview.html">2.1 Landscape Overview</a> — PINNs, Neural Operators, GNNs, PDE Foundation Models.</li>
-                  <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/pinn_physicsnemo.html">2.2 PINNs &amp; PhysicsNeMo</a> — Higher-order AD tape bottlenecks, <code>torch.compile</code> &amp; Warp.</li>
-                  <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/fno_neuraloperator.html">2.2 Fourier Neural Operator</a> — 3D FFT transposes, <code>cuFFTDx</code>, TFNO, FPGA streaming FFT.</li>
-                  <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/meshgraphnets.html">2.2 MeshGraphNets</a> — Unstructured <code>scatter_add</code> bandwidth &amp; RCM/Triton fusion.</li>
-                  <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/transolver_poseidon.html">2.2 Transolver &amp; Poseidon</a> — $O(N)$ Physics-Attention &amp; Cerebras WSE / FPGA/CGRA synthesis.</li>
+                  <li>
+                    <strong>2.2 Representative Methods</strong>
+                    <ul>
+                      <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/pinn_physicsnemo.html">2.2.1 PINNs &amp; PhysicsNeMo</a> — Higher-order AD tape bottlenecks, <code>torch.compile</code> &amp; Warp.</li>
+                      <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/fno_neuraloperator.html">2.2.2 Fourier Neural Operator</a> — 3D FFT transposes, <code>cuFFTDx</code>, TFNO, FPGA streaming FFT.</li>
+                      <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/meshgraphnets.html">2.2.3 MeshGraphNets</a> — Unstructured <code>scatter_add</code> bandwidth &amp; RCM/Triton fusion.</li>
+                      <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/transolver_poseidon.html">2.2.4 Transolver &amp; Poseidon</a> — $O(N)$ Physics-Attention &amp; Cerebras WSE / FPGA/CGRA synthesis.</li>
+                    </ul>
+                  </li>
                 </ul>
               </div>
             </div>
