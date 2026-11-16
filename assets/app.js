@@ -259,6 +259,9 @@ function mountShell() {
   });
 
   document.body.prepend(header, drawer);
+  if (window.MathJax?.typesetPromise) {
+    window.MathJax.typesetPromise([main]).catch(() => {});
+  }
 }
 
 function setupTabs() {
