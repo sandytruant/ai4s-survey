@@ -40,14 +40,14 @@
 
           <rect x="30" y="75" width="245" height="65" rx="6" fill="#ede9fe" stroke="#7c3aed"/>
           <text x="152" y="95" text-anchor="middle" font-weight="700" font-size="11.5" fill="#4c1d95">AI Replaces:</text>
-          <text x="152" y="112" text-anchor="middle" font-size="11" fill="#3b0764">Hand-crafted Slater-Jastrow ansatz</text>
-          <text x="152" y="128" text-anchor="middle" font-size="11" fill="#3b0764">via FermiNet / Psiformer backflows</text>
+          <text x="152" y="112" text-anchor="middle" font-size="10" fill="#3b0764">Hand-crafted Slater-Jastrow ansatz</text>
+          <text x="152" y="128" text-anchor="middle" font-size="10" fill="#3b0764">via FermiNet / Psiformer backflows</text>
 
           <rect x="30" y="150" width="245" height="80" rx="6" fill="#f0fdfa" stroke="#0d9488"/>
           <text x="152" y="170" text-anchor="middle" font-weight="700" font-size="11.5" fill="#115e59">Non-AI Remains:</text>
-          <text x="152" y="187" text-anchor="middle" font-size="11" fill="#134e4a">• Metropolis-Hastings MCMC sampling</text>
-          <text x="152" y="203" text-anchor="middle" font-size="11" fill="#134e4a">• Exact Laplacian ∇²ψ (kinetic energy)</text>
-          <text x="152" y="219" text-anchor="middle" font-size="11" fill="#134e4a">• Slater det + KFAC natural gradient</text>
+          <text x="152" y="187" text-anchor="middle" font-size="10" fill="#134e4a">• Metropolis-Hastings MCMC sampling</text>
+          <text x="152" y="203" text-anchor="middle" font-size="10" fill="#134e4a">• Exact Laplacian ∇²ψ (kinetic)</text>
+          <text x="152" y="219" text-anchor="middle" font-size="10" fill="#134e4a">• Slater det + KFAC natural gradient</text>
 
           <text x="152" y="254" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">Bottleneck: 2nd-order AD (∇²ψ) &amp; KFAC</text>
           <text x="152" y="274" text-anchor="middle" font-size="11" fill="#475569">Accuracy: CCSD(T)+ (10–100 electrons)</text>
@@ -60,17 +60,17 @@
 
           <rect x="327" y="75" width="245" height="65" rx="6" fill="#ede9fe" stroke="#7c3aed"/>
           <text x="450" y="95" text-anchor="middle" font-weight="700" font-size="11.5" fill="#4c1d95">AI Replaces:</text>
-          <text x="450" y="112" text-anchor="middle" font-size="11" fill="#3b0764">10–50 SCF iterations &amp; 3D grid</text>
-          <text x="450" y="128" text-anchor="middle" font-size="11" fill="#3b0764">integrals via SE(3)/E(3)-equivariant GNN</text>
+          <text x="450" y="112" text-anchor="middle" font-size="10" fill="#3b0764">10–50 SCF iterations &amp; 3D grid</text>
+          <text x="450" y="128" text-anchor="middle" font-size="10" fill="#3b0764">integrals via E(3)-equivariant GNN</text>
 
           <rect x="327" y="150" width="245" height="80" rx="6" fill="#f0fdfa" stroke="#0d9488"/>
           <text x="450" y="170" text-anchor="middle" font-weight="700" font-size="11.5" fill="#115e59">Non-AI Remains:</text>
-          <text x="450" y="187" text-anchor="middle" font-size="11" fill="#134e4a">• Overlap matrix S_μν integrals</text>
-          <text x="450" y="203" text-anchor="middle" font-size="11" fill="#134e4a">• 1-shot generalized eigensolve HC = SCE</text>
-          <text x="450" y="219" text-anchor="middle" font-size="11" fill="#134e4a">• Sparse/band post-processing</text>
+          <text x="450" y="187" text-anchor="middle" font-size="10" fill="#134e4a">• Overlap matrix S_μν integrals</text>
+          <text x="450" y="203" text-anchor="middle" font-size="10" fill="#134e4a">• 1-shot eigensolve HC = SCE</text>
+          <text x="450" y="219" text-anchor="middle" font-size="10" fill="#134e4a">• Sparse/band post-processing</text>
 
           <text x="450" y="254" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">Bottleneck: Clebsch-Gordan TP &amp; HC=SCE</text>
-          <text x="450" y="274" text-anchor="middle" font-size="11" fill="#475569">Scale: 10⁴+ atoms (DeepH-E3), molecules</text>
+          <text x="450" y="274" text-anchor="middle" font-size="10" fill="#475569">Scale: 10⁴+ atoms (DeepH-E3), molecules</text>
           <text x="450" y="294" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2563eb">&rarr; DeepH-E3 &amp; QHNet</text>
 
           <!-- Column 3: Neural XC Functionals -->
@@ -80,17 +80,17 @@
 
           <rect x="625" y="75" width="245" height="65" rx="6" fill="#ede9fe" stroke="#7c3aed"/>
           <text x="747" y="95" text-anchor="middle" font-weight="700" font-size="11.5" fill="#4c1d95">AI Replaces:</text>
-          <text x="747" y="112" text-anchor="middle" font-size="11" fill="#3b0764">Analytical E_XC[ρ] formula (PBE, B3LYP)</text>
-          <text x="747" y="128" text-anchor="middle" font-size="11" fill="#3b0764">with neural network on grid features</text>
+          <text x="747" y="112" text-anchor="middle" font-size="10" fill="#3b0764">Analytical E_XC[ρ] (PBE, B3LYP)</text>
+          <text x="747" y="128" text-anchor="middle" font-size="10" fill="#3b0764">with neural network on grid features</text>
 
           <rect x="625" y="150" width="245" height="80" rx="6" fill="#f0fdfa" stroke="#0d9488"/>
           <text x="747" y="170" text-anchor="middle" font-weight="700" font-size="11.5" fill="#115e59">Non-AI Remains:</text>
-          <text x="747" y="187" text-anchor="middle" font-size="11" fill="#134e4a">• Entire classical SCF loop</text>
-          <text x="747" y="203" text-anchor="middle" font-size="11" fill="#134e4a">• Quadrature grid integration &amp; ERI</text>
-          <text x="747" y="219" text-anchor="middle" font-size="11" fill="#134e4a">• O(N³) Fock matrix diagonalization</text>
+          <text x="747" y="187" text-anchor="middle" font-size="10" fill="#134e4a">• Entire classical SCF loop</text>
+          <text x="747" y="203" text-anchor="middle" font-size="10" fill="#134e4a">• Quadrature grid integration &amp; ERI</text>
+          <text x="747" y="219" text-anchor="middle" font-size="10" fill="#134e4a">• O(N³) Fock matrix diagonalization</text>
 
           <text x="747" y="254" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">Bottleneck: Grid MLP eval + SCF O(N³)</text>
-          <text x="747" y="274" text-anchor="middle" font-size="11" fill="#475569">Accuracy: Hybrid/CCSD(T) at meta-GGA cost</text>
+          <text x="747" y="274" text-anchor="middle" font-size="10" fill="#475569">Accuracy: Hybrid/CCSD(T) at meta-GGA cost</text>
           <text x="747" y="294" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2563eb">&rarr; DM21 &amp; Skala</text>
         </svg>
         <div class="diagram-caption">Figure 2.1: Taxonomy of AI4S approaches for electronic structure, highlighting the exact boundary between learned neural components (purple) and remaining classical kernels (teal).</div>

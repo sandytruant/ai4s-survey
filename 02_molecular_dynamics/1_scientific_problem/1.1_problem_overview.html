@@ -47,39 +47,39 @@
           </marker>
         </defs>
         <!-- Step 1 -->
-        <rect x="20" y="35" width="165" height="75" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
-        <text x="102" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1. Neighbor Search</text>
-        <text x="102" y="80" text-anchor="middle" font-size="11" fill="#475569">Verlet / Cell List</text>
-        <text x="102" y="96" text-anchor="middle" font-size="11" fill="#0d9488">Cutoff r_c (5–12 Å)</text>
+        <rect x="15" y="35" width="165" height="75" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="97" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1. Neighbor Search</text>
+        <text x="97" y="80" text-anchor="middle" font-size="11" fill="#475569">Verlet / Cell List</text>
+        <text x="97" y="96" text-anchor="middle" font-size="11" fill="#0d9488">Cutoff r_c (5–12 Å)</text>
 
-        <line x1="185" y1="72" x2="225" y2="72" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="180" y1="72" x2="210" y2="72" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
 
         <!-- Step 2 -->
-        <rect x="230" y="35" width="185" height="75" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
-        <text x="322" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">2. Force Evaluation</text>
-        <text x="322" y="80" text-anchor="middle" font-size="11" fill="#475569">F_i = -∇_i E(R)</text>
-        <text x="322" y="96" text-anchor="middle" font-size="11" fill="#2563eb">90–99.9% of Runtime</text>
+        <rect x="215" y="35" width="185" height="75" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+        <text x="307" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">2. Force Evaluation</text>
+        <text x="307" y="80" text-anchor="middle" font-size="11" fill="#475569">F_i = -∇_i E(R)</text>
+        <text x="307" y="96" text-anchor="middle" font-size="11" fill="#2563eb">90–99.9% of Runtime</text>
 
-        <line x1="415" y1="72" x2="455" y2="72" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="400" y1="72" x2="430" y2="72" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
 
         <!-- Step 3 -->
-        <rect x="460" y="35" width="165" height="75" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
-        <text x="542" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">3. Velocity Verlet</text>
-        <text x="542" y="80" text-anchor="middle" font-size="11" fill="#475569">Update r_i, v_i</text>
-        <text x="542" y="96" text-anchor="middle" font-size="11" fill="#0d9488">Δt ≈ 1 fs (O(N) FLOPs)</text>
+        <rect x="435" y="35" width="170" height="75" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="520" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">3. Velocity Verlet</text>
+        <text x="520" y="80" text-anchor="middle" font-size="11" fill="#475569">Update r_i, v_i</text>
+        <text x="520" y="96" text-anchor="middle" font-size="10.5" fill="#0d9488">Δt ≈ 1 fs (O(N) FLOPs)</text>
 
-        <line x1="625" y1="72" x2="665" y2="72" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="605" y1="72" x2="635" y2="72" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
 
         <!-- Step 4 -->
-        <rect x="670" y="35" width="130" height="75" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
-        <text x="735" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">4. Ensemble</text>
-        <text x="735" y="80" text-anchor="middle" font-size="11" fill="#475569">Thermostat / Barostat</text>
-        <text x="735" y="96" text-anchor="middle" font-size="11" fill="#0d9488">PBC Wrapping</text>
+        <rect x="640" y="35" width="165" height="75" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="722" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">4. Ensemble</text>
+        <text x="722" y="80" text-anchor="middle" font-size="11" fill="#475569">Thermostat / Barostat</text>
+        <text x="722" y="96" text-anchor="middle" font-size="11" fill="#0d9488">PBC Wrapping</text>
 
         <!-- Loop back -->
-        <path d="M 735 110 L 735 160 L 102 160 L 102 114" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-        <rect x="260" y="144" width="300" height="30" rx="15" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
-        <text x="410" y="164" text-anchor="middle" font-size="12" font-weight="600" fill="#92400e">Sequential Time Loop: 10⁶ to 10⁹ Iterations (No Time-Parallelism)</text>
+        <path d="M 722 110 L 722 160 L 97 160 L 97 114" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+        <rect x="150" y="144" width="520" height="30" rx="15" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+        <text x="410" y="164" text-anchor="middle" font-size="11.5" font-weight="600" fill="#92400e">Sequential Time Loop: 10⁶ to 10⁹ Iterations (No Time-Parallelism)</text>
       </svg>
       <div class="diagram-caption">Figure 1: The canonical MD time-integration loop. Force evaluation dominates compute, while sequential data dependencies force strict step-by-step execution.</div>
     </div>
@@ -113,7 +113,7 @@
         <!-- Outside cutoff -->
         <circle cx="70" cy="55" r="6" fill="#94a3b8"/>
         <circle cx="305" cy="165" r="6" fill="#94a3b8"/>
-        <text x="190" y="196" text-anchor="middle" font-size="11" fill="#475569">Dynamic Sparse Graph: Edges change every ~10–20 steps</text>
+        <text x="190" y="196" text-anchor="middle" font-size="10" fill="#475569">Dynamic Sparse Graph: Edges change every ~10–20 steps</text>
 
         <!-- Right: CSR / Neighbor List -->
         <rect x="390" y="15" width="350" height="190" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
@@ -122,7 +122,7 @@
         <rect x="520" y="52" width="35" height="24" fill="#f1f5f9" stroke="#94a3b8"/><text x="537" y="68" text-anchor="middle" font-size="11">0</text>
         <rect x="555" y="52" width="35" height="24" fill="#f1f5f9" stroke="#94a3b8"/><text x="572" y="68" text-anchor="middle" font-size="11">4</text>
         <rect x="590" y="52" width="35" height="24" fill="#f1f5f9" stroke="#94a3b8"/><text x="607" y="68" text-anchor="middle" font-size="11">9</text>
-        <rect x="625" y="52" width="35" height="24" fill="#f1f5f9" stroke="#94a3b8"/><text x="642" y="68" text-anchor="middle" font-size="11">...</text>
+        <rect x="625" y="52" width="35" height="24" fill="#f1f5f9" stroke="#94a3b8"/><text x="642" y="68" text-anchor="middle" font-size="11">…</text>
 
         <text x="415" y="110" font-size="12" font-weight="600" fill="#0f172a">Neighbor IDs:</text>
         <rect x="520" y="94" width="35" height="24" fill="#f0fdfa" stroke="#0d9488"/><text x="537" y="110" text-anchor="middle" font-size="11">12</text>
@@ -132,8 +132,8 @@
         <rect x="660" y="94" width="35" height="24" fill="#eff6ff" stroke="#2563eb"/><text x="677" y="110" text-anchor="middle" font-size="11">5</text>
 
         <text x="565" y="150" text-anchor="middle" font-size="11" fill="#dc2626" font-weight="600">Irregular Gather: R[j] non-contiguous in DRAM</text>
-        <text x="565" y="172" text-anchor="middle" font-size="11" fill="#475569">Periodic Boundary Conditions (PBC) wrap coordinates</text>
-        <text x="565" y="188" text-anchor="middle" font-size="11" fill="#475569">via minimum-image convention across box walls.</text>
+        <text x="565" y="172" text-anchor="middle" font-size="10" fill="#475569">Periodic Boundary Conditions (PBC) wrap coordinates</text>
+        <text x="565" y="188" text-anchor="middle" font-size="10" fill="#475569">via minimum-image convention across box walls.</text>
       </svg>
       <div class="diagram-caption">Figure 2: Cutoff radius $r_c$ induces a dynamic 3D spatial graph stored in Compressed Sparse Row (CSR) or padded Verlet neighbor lists.</div>
     </div>

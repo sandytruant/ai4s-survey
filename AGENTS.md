@@ -18,6 +18,7 @@ This repository contains a systematic survey of **AI for Science (AI4S)** applic
 
 4. **Visual-First & Intuitive Explanations**
    - **Prefer diagrams over walls of text.** Anything that can be explained visually—physical intuition, multi-scale relationships, solver workflows, AI vs. non-AI step boundaries, tensor shapes, dataflow, and hardware bottlenecks—must be illustrated using inline **SVG** diagrams, **Mermaid** diagrams, or visual HTML/CSS flowcharts.
+   - **No SVG Text Overflow:** Every `<text>` element inside an inline `<svg>` must fit comfortably inside its enclosing `<rect>` / container and `viewBox` with generous padding (at least `8–12 px` horizontal margin on each side). Keep labels concise, split long captions across multiple lines (`<tspan>` or stacked `<text>` elements), widen boxes or `viewBox` dimensions as needed, and run an automated bounding-box check before committing.
    - Keep prose concise, punchy, and structured. Avoid dense paragraphs.
 
 5. **Workspace Hygiene (No `/tmp`)**
