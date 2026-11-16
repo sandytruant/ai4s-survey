@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NequIP &amp; Allegro — Representative AI4S Method | AI4S Survey</title>
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <script type="module" src="../../../assets/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 2: Molecular Dynamics</span> &rsaquo;
+    <a href="../2.1_landscape_overview.html">2.1 Landscape</a> &rsaquo;
+    <strong>NequIP &amp; Allegro</strong>
+  </nav>
+
+  <header class="hero">
+    <h1>NequIP &amp; Allegro: Equivariant GNNs vs. Strictly Local Tensor Products</h1>
+    <p class="subtitle">From $E(3)$-equivariant message passing (NequIP) to strictly local edge-based tensor products (Allegro) that eliminate multi-hop halo blowup to reach 100M atoms.</p>
+    <p style="margin-top:0.75rem;">
+      <span class="badge badge-ai">E(3)-Equivariant</span>
+      <span class="badge badge-hw">LAMMPS Kokkos / A100</span>
+      &nbsp;|&nbsp;
+      <a href="https://github.com/mir-group/nequip" target="_blank">GitHub: mir-group/nequip</a>
+      &nbsp;|&nbsp;
+      <a href="https://github.com/mir-group/allegro" target="_blank">GitHub: mir-group/allegro</a>
+      &nbsp;|&nbsp;
+      <a href="https://www.nature.com/articles/s41467-022-29939-5" target="_blank">NequIP (Nat. Commun. 2022)</a>
+      &nbsp;|&nbsp;
+      <a href="https://www.nature.com/articles/s41467-023-36329-y" target="_blank">Allegro (Nat. Commun. 2023)</a>
+    </p>
+  </header>
+
+  <div class="section-card">
+    <h2>2.2.1 Overall Workflow: Why Allegro Drops Message Passing</h2>
+    <p>
+      <strong>NequIP</strong> introduced $E(3)$-equivariant message passing using irreducible representations (irreps) of $O(3)$ and Clebsch-Gordan tensor products, achieving unprecedented data efficiency. However, $L$ message-passing layers expand the effective receptive field to $L \cdot r_c$ (e.g., $4 \times 5\text{ \AA} = 20\text{ \AA}$), causing cubic growth in MPI ghost-atom halo volume and blocking multi-GPU scaling.
+    </p>
+    <p>
+      <strong>Allegro</strong> solves this architectural bottleneck by removing atom-centered message passing entirely. It maintains <strong>strict locality</strong> within a single cutoff $r_c$ by iterating equivariant tensor products directly on directed <em>edge</em> features $(i, j)$ combined with a scalar latent track.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 220" width="820" height="220" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+        <!-- Non-AI 1 -->
+        <rect x="15" y="30" width="145" height="95" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="87" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">Non-AI: LAMMPS</text>
+        <text x="87" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Single-Cutoff Halo</text>
+        <text x="87" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Kokkos Neighbor List</text>
+        <text x="87" y="106" text-anchor="middle" font-size="10.5" fill="#0d9488">Edge Pairs (i, j)</text>
+
+        <line x1="160" y1="77" x2="185" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI 1 -->
+        <rect x="190" y="30" width="155" height="95" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="267" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Edge Embeddings</text>
+        <text x="267" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Bessel Radial Basis</text>
+        <text x="267" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Spherical Harmonics Y_l^m</text>
+        <text x="267" y="106" text-anchor="middle" font-size="10.5" fill="#7c3aed">2-Body MLP Latent</text>
+
+        <line x1="345" y1="77" x2="370" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI 2 -->
+        <rect x="375" y="30" width="170" height="95" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="460" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Allegro Layers</text>
+        <text x="460" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Local Edge Tensor Prod.</text>
+        <text x="460" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Scalar-Equivariant Mix</text>
+        <text x="460" y="106" text-anchor="middle" font-size="10.5" fill="#7c3aed">No Multi-Hop Sync!</text>
+
+        <line x1="545" y1="77" x2="570" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI 3 -->
+        <rect x="575" y="30" width="115" height="95" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="632" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Readout</text>
+        <text x="632" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Sum Edges → E_i</text>
+        <text x="632" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Autograd ∂E/∂r_i</text>
+        <text x="632" y="106" text-anchor="middle" font-size="10.5" fill="#7c3aed">TorchScript / AOT</text>
+
+        <line x1="690" y1="77" x2="710" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Non-AI 2 -->
+        <rect x="715" y="30" width="90" height="95" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="760" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">Non-AI</text>
+        <text x="760" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Verlet Step</text>
+        <text x="760" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Thermostat</text>
+        <text x="760" y="106" text-anchor="middle" font-size="10.5" fill="#0d9488">PBC Wrap</text>
+
+        <rect x="15" y="148" width="790" height="48" rx="6" fill="#fffbeb" stroke="#fde68a"/>
+        <text x="410" y="177" text-anchor="middle" font-size="11.5" fill="#92400e">
+          <strong>Compiler Insight:</strong> Replacing multi-hop MPNN with strictly local edge tensor products cuts halo communication from O((L·r_c)³) to O(r_c³).
+        </text>
+      </svg>
+      <div class="diagram-caption">Figure 1: Allegro strictly local equivariant pipeline in LAMMPS-Kokkos.</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>2.2.2 Computational Profiling &amp; Bottlenecks</h2>
+    <ul>
+      <li><strong>Extreme Scale Milestone:</strong> Integrated with LAMMPS via Kokkos/LibTorch, Allegro demonstrated production MD simulations exceeding <strong>100 million atoms</strong> on NVIDIA A100 GPU clusters (e.g., NERSC Perlmutter), maintaining near-linear weak scaling because each GPU only exchanges a single-$r_c$ ghost halo.</li>
+      <li><strong>Compute &amp; Memory Bottlenecks:</strong> Standard implementations rely on <code>e3nn</code> / PyTorch JIT, where Clebsch-Gordan tensor products on every directed edge $(i, j)$ generate many small, memory-bound kernels, high register pressure, and large intermediate activation tensors saved for autograd backward force computation ($\mathbf{F}_i = -\nabla_i E$).</li>
+    </ul>
+  </div>
+
+  <div class="section-card">
+    <h2>2.2.3 Dedicated Accelerators &amp; Kernel Libraries</h2>
+    <ul>
+      <li><strong>NVIDIA cuEquivariance &amp; OpenEquivariance / FlashTP:</strong> Specialized CUDA tensor-product libraries fuse sparse Clebsch-Gordan contractions into single GPU kernels, eliminating intermediate DRAM round-trips.</li>
+      <li><strong>LAMMPS-Kokkos / TorchScript / AOTInductor:</strong> Compiles the PyTorch graph ahead of time to remove Python GIL and dispatch latency during tight microsecond-scale MD loops.</li>
+    </ul>
+  </div>
+
+  <div class="page-nav">
+    <a href="deepmd_kit.html">&larr; 2.2.1 DeePMD-kit</a>
+    <a href="mace.html">2.2.3 MACE &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

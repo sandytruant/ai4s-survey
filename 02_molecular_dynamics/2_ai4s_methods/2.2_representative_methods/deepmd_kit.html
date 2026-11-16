@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeePMD-kit — Representative AI4S Method | AI4S Survey</title>
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <script type="module" src="../../../assets/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 2: Molecular Dynamics</span> &rsaquo;
+    <a href="../2.1_landscape_overview.html">2.1 Landscape</a> &rsaquo;
+    <strong>DeePMD-kit</strong>
+  </nav>
+
+  <header class="hero">
+    <h1>DeePMD-kit (Deep Potential Molecular Dynamics)</h1>
+    <p class="subtitle">Invariant local-environment descriptors + compact MLPs engineered for leadership-class supercomputers (100M+ atoms on Summit, 149 ns/day on Fugaku).</p>
+    <p style="margin-top:0.75rem;">
+      <span class="badge badge-ai">Invariant Descriptor + MLP</span>
+      <span class="badge badge-hw">CUDA / ROCm / SVE / NPU</span>
+      &nbsp;|&nbsp;
+      <a href="https://github.com/deepmodeling/deepmd-kit" target="_blank">GitHub: deepmodeling/deepmd-kit</a>
+      &nbsp;|&nbsp;
+      <a href="https://arxiv.org/abs/2005.00223" target="_blank">Summit Gordon Bell Paper (arXiv:2005.00223)</a>
+      &nbsp;|&nbsp;
+      <a href="https://arxiv.org/abs/2409.06954" target="_blank">Fugaku SC24 Paper (arXiv:2409.06954)</a>
+    </p>
+  </header>
+
+  <div class="section-card">
+    <h2>2.2.1 Overall Workflow: AI vs. Non-AI Pipeline</h2>
+    <p>
+      DeePMD-kit (using the DeepPot-SE smooth edition) avoids expensive spherical harmonics and Clebsch-Gordan tensor products. Instead, it constructs a symmetry-preserving <strong>local environment matrix $\tilde{\mathcal{R}}_i$</strong> from relative neighbor coordinates within $r_c$, passes radial distances through an <strong>embedding MLP</strong>, contracts into an invariant descriptor $\mathcal{D}_i$, and evaluates a <strong>fitting MLP</strong> to produce per-atom energy $E_i$.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 215" width="820" height="215" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+        <!-- Non-AI 1 -->
+        <rect x="15" y="30" width="145" height="95" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="87" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">Non-AI: LAMMPS</text>
+        <text x="87" y="74" text-anchor="middle" font-size="10.5" fill="#475569">MPI Halo Exchange</text>
+        <text x="87" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Neighbor List (r_c)</text>
+        <text x="87" y="106" text-anchor="middle" font-size="10.5" fill="#0d9488">Rel. Coords R_ij</text>
+
+        <line x1="160" y1="77" x2="185" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI 1 -->
+        <rect x="190" y="30" width="155" height="95" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="267" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Embedding Net</text>
+        <text x="267" y="74" text-anchor="middle" font-size="10.5" fill="#475569">1/r_ij → G(s_ij)</text>
+        <text x="267" y="90" text-anchor="middle" font-size="10.5" fill="#475569">3-Layer MLP (tanh)</text>
+        <text x="267" y="106" text-anchor="middle" font-size="10.5" fill="#7c3aed">Fused Tabulation/CUDA</text>
+
+        <line x1="345" y1="77" x2="370" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI 2 -->
+        <rect x="375" y="30" width="145" height="95" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="447" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Descriptor &amp; Fit</text>
+        <text x="447" y="74" text-anchor="middle" font-size="10.5" fill="#475569">D_i = G^T R R^T G_&lt;</text>
+        <text x="447" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Fitting MLP → E_i</text>
+        <text x="447" y="106" text-anchor="middle" font-size="10.5" fill="#7c3aed">Dense Batched GEMM</text>
+
+        <line x1="520" y1="77" x2="545" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI 3 -->
+        <rect x="550" y="30" width="125" height="95" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="612" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Force Kernel</text>
+        <text x="612" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Explicit Backprop</text>
+        <text x="612" y="90" text-anchor="middle" font-size="10.5" fill="#475569">F_i = -∂E/∂r_i</text>
+        <text x="612" y="106" text-anchor="middle" font-size="10.5" fill="#7c3aed">Virial Stress</text>
+
+        <line x1="675" y1="77" x2="700" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Non-AI 2 -->
+        <rect x="705" y="30" width="100" height="95" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="755" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">Non-AI</text>
+        <text x="755" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Reverse Halo</text>
+        <text x="755" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Verlet Step</text>
+        <text x="755" y="106" text-anchor="middle" font-size="10.5" fill="#0d9488">PBC Wrap</text>
+
+        <rect x="15" y="148" width="790" height="45" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+        <text x="410" y="175" text-anchor="middle" font-size="11.5" fill="#1e40af">
+          <strong>Key Advantage:</strong> Strictly local (single cutoff r_c, no multi-hop GNN message passing) → minimal MPI ghost-atom halo volume!
+        </text>
+      </svg>
+      <div class="diagram-caption">Figure 1: DeePMD-kit end-to-end step pipeline inside LAMMPS.</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>2.2.2 Computational Profiling &amp; Bottlenecks</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Platform &amp; Scale</th>
+          <th>Benchmark System</th>
+          <th>Published Throughput / Efficiency</th>
+          <th>Key Optimizations &amp; Bottlenecks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>OLCF Summit</strong><br>(27,360 NVIDIA V100 GPUs)</td>
+          <td>Copper &amp; Water<br>(&gt;100M atoms)</td>
+          <td><strong>91 PFLOPS (FP64, 45.5% peak)</strong>;<br><strong>275 PFLOPS</strong> mixed-half precision</td>
+          <td>Fused custom CUDA kernels for environment matrix &amp; embedding net; bypassed TensorFlow framework overhead; mixed-precision Tensor Core GEMMs.</td>
+        </tr>
+        <tr>
+          <td><strong>RIKEN Fugaku</strong><br>(12,000 A64FX nodes, SC24)</td>
+          <td>Copper<br>(0.54M atoms)</td>
+          <td><strong>149 ns/day</strong> (strong-scaled)</td>
+          <td>Node-based parallelization tailored to TofuD interconnect &amp; NoC ring bus; <code>sve-gemm</code> vectorization; spatial decomposition for intra-node load balance.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <strong>Architectural Bottleneck:</strong> Profiling shows <strong>&gt;90% of runtime</strong> is spent in DNN inference (embedding net + descriptor contraction). At extreme strong scaling, ghost-atom halo communication across $r_c$ sets the lower bound on step latency, while TensorFlow/PyTorch dispatch overhead must be stripped out via C++/CUDA/ROCm custom operators.
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>2.2.3 Dedicated Accelerators &amp; Hardware Co-Design</h2>
+    <ul>
+      <li><strong>Classical MD ASICs (Baseline Comparison):</strong> D. E. Shaw <strong>Anton 1 / 2 / 3</strong> (512-node Anton 3 achieves &gt;100 $\mu$s/day on 1M atoms) and RIKEN <strong>MDGRAPE-4 / 4A</strong> (custom SoC with non-bonded pipelines + 3D torus) accelerate fixed empirical force fields, not neural networks.</li>
+      <li><strong>DeePMD-kit Custom Backends:</strong> Dedicated optimizations exist across <strong>NVIDIA V100/A100 Tensor Cores</strong> (mixed FP16/FP32), <strong>AMD ROCm</strong> (Frontier), <strong>ARM SVE</strong> (Fugaku A64FX), <strong>Sunway TaihuLight/OceanLight</strong> many-core architectures, and <strong>model compression / polynomial tabulation</strong> (replacing embedding MLP inference with cubic spline lookup tables in L1/shared memory).</li>
+    </ul>
+  </div>
+
+  <div class="page-nav">
+    <a href="../2.1_landscape_overview.html">&larr; 2.1 Landscape Overview</a>
+    <a href="nequip_allegro.html">2.2.2 NequIP &amp; Allegro &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

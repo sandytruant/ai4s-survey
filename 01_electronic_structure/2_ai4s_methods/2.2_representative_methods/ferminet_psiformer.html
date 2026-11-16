@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FermiNet &amp; Psiformer — Electronic Structure | AI4S Survey</title>
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <script type="module" src="../../../assets/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../../../index.html">AI4S Survey</a>
+      <span>/</span>
+      <span>Pillar 1: Electronic Structure</span>
+      <span>/</span>
+      <a href="../2.1_landscape_overview.html">2.1 Landscape</a>
+      <span>/</span>
+      <span>FermiNet &amp; Psiformer</span>
+    </nav>
+
+    <header class="hero">
+      <span class="badge badge-ai">Paradigm (a): Neural Network Wavefunctions (VMC)</span>
+      <h1>FermiNet &amp; Psiformer</h1>
+      <p class="subtitle">Solving the many-electron Schrödinger equation directly via Variational Monte Carlo (VMC) with antisymmetric neural networks, Forward Laplacian autodiff, and KFAC natural gradients.</p>
+      <p style="margin-top:0.75rem; font-size:0.93rem;">
+        <strong>Verified Sources:</strong>
+        <a href="https://arxiv.org/abs/1909.02487" target="_blank" rel="noopener">FermiNet Paper (Phys. Rev. Research 2020)</a> |
+        <a href="https://arxiv.org/abs/2211.13672" target="_blank" rel="noopener">Psiformer Paper (ICLR 2023)</a> |
+        <a href="https://github.com/google-deepmind/ferminet" target="_blank" rel="noopener">GitHub: google-deepmind/ferminet</a> |
+        <a href="https://github.com/microsoft/folx" target="_blank" rel="noopener">GitHub: microsoft/folx</a>
+      </p>
+    </header>
+
+    <section class="section-card">
+      <h2>2.2.1 Overall Workflow: AI vs. Non-AI Kernels</h2>
+      <p>FermiNet (multi-stream equivariant MLP) and Psiformer (self-attention Transformer over electron coordinates) replace classical hand-crafted Slater-Jastrow wavefunctions with a deep neural ansatz $\Psi_\theta(\mathbf{r}_1,\dots,\mathbf{r}_N)$ trained end-to-end by minimizing the variational energy $E[\Psi_\theta] = \langle \Psi_\theta | \hat{H} | \Psi_\theta \rangle / \langle \Psi_\theta | \Psi_\theta \rangle$.</p>
+
+      <div class="diagram-box">
+        <svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FermiNet and Psiformer VMC Workflow with AI and Non-AI color coding">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#334155"/>
+            </marker>
+          </defs>
+          <!-- Legend -->
+          <rect x="20" y="10" width="14" height="14" rx="3" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+          <text x="40" y="22" font-size="11.5" font-weight="600" fill="#5b21b6">AI / Neural Network Step</text>
+          <rect x="210" y="10" width="14" height="14" rx="3" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+          <text x="230" y="22" font-size="11.5" font-weight="600" fill="#115e59">Non-AI Classical / Physics Kernel</text>
+
+          <!-- Step 1: MCMC -->
+          <rect x="15" y="45" width="160" height="105" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+          <text x="95" y="68" text-anchor="middle" font-weight="700" font-size="12" fill="#115e59">1. MCMC Sampling</text>
+          <text x="95" y="88" text-anchor="middle" font-size="10.5" fill="#134e4a">Metropolis-Hastings</text>
+          <text x="95" y="104" text-anchor="middle" font-size="10.5" fill="#134e4a">Batch B=4096 walkers</text>
+          <text x="95" y="120" text-anchor="middle" font-size="10.5" fill="#134e4a">Propose R' ~ N(R, σ²)</text>
+          <text x="95" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#0f766e">Non-AI (Calls Ψ_θ)</text>
+
+          <line x1="175" y1="97" x2="198" y2="97" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Step 2: Neural Backbone -->
+          <rect x="202" y="45" width="175" height="105" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <text x="289" y="68" text-anchor="middle" font-weight="700" font-size="12" fill="#5b21b6">2. Neural Orbitals</text>
+          <text x="289" y="88" text-anchor="middle" font-size="10.5" fill="#3b0764">FermiNet: 1e/2e streams</text>
+          <text x="289" y="104" text-anchor="middle" font-size="10.5" fill="#3b0764">Psiformer: Self-Attention</text>
+          <text x="289" y="120" text-anchor="middle" font-size="10.5" fill="#3b0764">Outputs φ_i^k(r_j; R)</text>
+          <text x="289" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#6d28d9">AI (Dense GEMMs)</text>
+
+          <line x1="377" y1="97" x2="400" y2="97" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Step 3: Slater Determinants -->
+          <rect x="404" y="45" width="155" height="105" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+          <text x="481" y="68" text-anchor="middle" font-weight="700" font-size="12" fill="#115e59">3. Antisymmetry</text>
+          <text x="481" y="88" text-anchor="middle" font-size="10.5" fill="#134e4a">log|Ψ| = log Σ_k ω_k det[φ^k]</text>
+          <text x="481" y="104" text-anchor="middle" font-size="10.5" fill="#134e4a">Batched LU decomp.</text>
+          <text x="481" y="120" text-anchor="middle" font-size="10.5" fill="#134e4a">O(N³) per determinant</text>
+          <text x="481" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#0f766e">Non-AI (FP32/FP64)</text>
+
+          <line x1="559" y1="97" x2="582" y2="97" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Step 4: Local Energy & Laplacian -->
+          <rect x="586" y="45" width="160" height="105" rx="8" fill="#f0fdfa" stroke="#dc2626" stroke-width="2"/>
+          <text x="666" y="68" text-anchor="middle" font-weight="700" font-size="12" fill="#991b1b">4. Local Energy E_L</text>
+          <text x="666" y="88" text-anchor="middle" font-size="10.5" fill="#7f1d1d">E_L = -½(∇²Ψ/Ψ) + V(R)</text>
+          <text x="666" y="104" text-anchor="middle" font-size="10.5" fill="#7f1d1d">3N second derivatives</text>
+          <text x="666" y="120" text-anchor="middle" font-size="10.5" fill="#7f1d1d">via nested AD / folx</text>
+          <text x="666" y="138" text-anchor="middle" font-size="10" font-weight="700" fill="#dc2626">Primary Bottleneck!</text>
+
+          <line x1="746" y1="97" x2="769" y2="97" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Step 5: KFAC -->
+          <rect x="773" y="45" width="115" height="105" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+          <text x="830" y="68" text-anchor="middle" font-weight="700" font-size="12" fill="#5b21b6">5. KFAC Step</text>
+          <text x="830" y="88" text-anchor="middle" font-size="10.5" fill="#3b0764">Natural grad</text>
+          <text x="830" y="104" text-anchor="middle" font-size="10.5" fill="#3b0764">F⁻¹ ∇_θ E</text>
+          <text x="830" y="120" text-anchor="middle" font-size="10.5" fill="#3b0764">Cholesky inv.</text>
+          <text x="830" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#6d28d9">AI Optimizer</text>
+
+          <!-- Feedback arrow -->
+          <path d="M 830 150 L 830 195 L 95 195 L 95 155" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+          <rect x="310" y="180" width="280" height="28" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+          <text x="450" y="198" text-anchor="middle" font-size="11" font-weight="600" fill="#334155">10⁵ – 10⁶ VMC Training Iterations per Molecule</text>
+        </svg>
+        <div class="diagram-caption">Figure 2.2: End-to-end VMC training loop in FermiNet/Psiformer. Unlike standard ML inference, evaluating the physics loss requires computing the exact second-order Laplacian $\nabla^2 \log|\Psi_\theta|$ at every walker step.</div>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>2.2.2 Computational Profiling &amp; Compiler Bottlenecks</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Metric / Aspect</th>
+            <th>Observed Behavior &amp; Published Profiling</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Hardware &amp; Framework</strong></td>
+            <td>JAX + XLA + <code>kfac_jax</code> on <strong>NVIDIA V100 / A100 GPUs</strong> (standard batch size 4,096 MCMC walkers; FP32/TF32 for network, FP32/FP64 stability for determinants).</td>
+          </tr>
+          <tr>
+            <td><strong>Primary Bottleneck: Laplacian ($\nabla^2 \Psi$)</strong></td>
+            <td>Standard reverse-mode nested autodiff (computing $\text{tr}(\mathbf{H}_{\mathbf{r}})$ via <code>jax.jvp</code> over <code>jax.grad</code>) scales poorly in both compute and activation memory ($O(N^2)$ to $O(N^3)$ with electron count $N$).</td>
+          </tr>
+          <tr>
+            <td><strong>Forward Laplacian (<code>folx</code>) Speedup</strong></td>
+            <td>Li et al. (2023, <em>Forward Laplacian</em>, <a href="https://github.com/microsoft/folx" target="_blank" rel="noopener"><code>microsoft/folx</code></a>) replaces nested AD with sparse forward-mode propagation, exploiting block-diagonal structure in electron-coordinate Jacobians to achieve <strong>&gt;10&times; speedup</strong> per VMC iteration on A100 GPUs for FermiNet/Psiformer on extended molecules.</td>
+          </tr>
+          <tr>
+            <td><strong>Optimizer Bottleneck (KFAC)</strong></td>
+            <td>First-order Adam fails to converge to chemical accuracy. KFAC-JAX requires computing Kronecker-factored Fisher matrices and inverting them per layer, adding memory footprint and small-matrix Cholesky/eigh overhead.</td>
+          </tr>
+          <tr>
+            <td><strong>Architectural Scaling</strong></td>
+            <td>Psiformer's self-attention scales as $O(N^2)$ in electron count rather than FermiNet's dense pairwise 2-electron stream, improving expressiveness on larger systems (up to ~80–100 electrons) while remaining bounded by determinant $O(N^3)$ and Laplacian cost.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section-card">
+      <h2>2.2.3 Dedicated Accelerators &amp; Kernel Libraries</h2>
+      <ul>
+        <li><strong><code>folx</code> (Forward Laplacian for JAX):</strong> Compiler-level AD transformation (<a href="https://github.com/microsoft/folx" target="_blank" rel="noopener"><code>microsoft/folx</code></a>) that fuses Laplacian propagation and prunes zero off-diagonal Jacobian blocks, turning an activation-memory-bound kernel into a compute-efficient forward pass on NVIDIA A100/H100.</li>
+        <li><strong>JAX / XLA &amp; Google TPU / NVIDIA Tensor Cores:</strong> DeepMind's <code>ferminet</code> leverages XLA whole-program compilation to fuse elementwise activations with dense GEMMs (attention projections in Psiformer) and batched <code>slogdet</code> kernels across 4,096 walkers.</li>
+        <li><strong>No Custom ASICs Yet:</strong> No dedicated silicon ASIC exists for NN-VMC; workloads run on general-purpose AI GPUs (A100/H100) and TPUs, where <strong>high FP32 Tensor Core throughput + large HBM capacity</strong> for intermediate AD tapes are the decisive hardware features.</li>
+      </ul>
+    </section>
+
+    <div class="page-nav">
+      <a href="../2.1_landscape_overview.html">&larr; 2.1 AI4S Landscape</a>
+      <a href="deeph_e3.html">DeepH-E3 &rarr;</a>
+    </div>
+  </div>
+</body>
+</html>

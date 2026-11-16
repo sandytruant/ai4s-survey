@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeshGraphNets — Continuum Mechanics PDEs</title>
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <script type="module" src="../../../assets/app.js"></script>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 3: Continuum Mechanics PDEs</span> &rsaquo;
+    <a href="../2.1_landscape_overview.html">2.1 Landscape</a> &rsaquo;
+    <span>MeshGraphNets</span>
+  </nav>
+
+  <header class="hero">
+    <h1>MeshGraphNets (GNN)</h1>
+    <p class="subtitle">Learned message-passing simulators operating directly on unstructured FVM/FEM meshes—10–100&times; faster than COMSOL/OpenFOAM.</p>
+    <p style="margin-top:0.75rem;">
+      <span class="badge badge-ai">Encode-Process-Decode GNN</span>
+      <a href="https://arxiv.org/abs/2010.03409" target="_blank">Pfaff et al. ICLR 2021 (arXiv:2010.03409)</a> &bull;
+      <a href="https://github.com/deepmind/deepmind-research/tree/master/meshgraphnets" target="_blank">GitHub: deepmind-research/meshgraphnets</a> &bull;
+      <a href="https://github.com/echowve/meshGraphNets_pytorch" target="_blank">PyTorch/PyG Port</a>
+    </p>
+  </header>
+
+  <section class="section-card">
+    <h2>2.2.1 Overall Workflow</h2>
+    <p>
+      Unlike grid-based FNOs, MeshGraphNets operates natively on adaptive, unstructured meshes used in industrial CFD and FEM. Each mesh node becomes a graph vertex $v_i$ and each mesh edge becomes a bidirectional edge $e_{ij}$ carrying relative displacement $\mathbf{x}_i - \mathbf{x}_j$. An <strong>Encode-Process-Decode</strong> GNN performs $M=15$ message-passing steps to propagate physical waves/forces across the mesh, predicting state increments $\Delta \mathbf{u}$ for autoregressive rollout.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 225" width="820" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MeshGraphNets Encode-Process-Decode pipeline">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+
+        <!-- Non-AI Mesh to Graph -->
+        <rect x="15" y="25" width="160" height="135" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="95" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#115e59">NON-AI: Graph Build</text>
+        <text x="95" y="72" text-anchor="middle" font-size="10.5" fill="#334155">Unstructured mesh</text>
+        <text x="95" y="90" text-anchor="middle" font-size="10.5" fill="#334155">Edge list (src, dst)</text>
+        <text x="95" y="108" text-anchor="middle" font-size="10.5" fill="#334155">Rel pos Δx, |Δx|, BCs</text>
+        <text x="95" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#0d9488">CSR / COO Indices</text>
+
+        <line x1="175" y1="92" x2="200" y2="92" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI Encoder -->
+        <rect x="204" y="25" width="120" height="135" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="264" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Encoder</text>
+        <text x="264" y="78" text-anchor="middle" font-size="10.5" fill="#334155">Node MLP &rarr; v_i</text>
+        <text x="264" y="98" text-anchor="middle" font-size="10.5" fill="#334155">Edge MLP &rarr; e_ij</text>
+        <text x="264" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#7c3aed">Dense GEMM [N, 128]</text>
+
+        <line x1="324" y1="92" x2="349" y2="92" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI Processor -->
+        <rect x="353" y="25" width="195" height="135" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+        <text x="450" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#991b1b">AI BOTTLENECK: Processor</text>
+        <text x="450" y="70" text-anchor="middle" font-size="10.5" fill="#334155">L=15 Message Passing:</text>
+        <text x="450" y="88" text-anchor="middle" font-size="10.5" fill="#334155">1. Gather v_i, v_j &rarr; Edge MLP</text>
+        <text x="450" y="106" text-anchor="middle" font-size="10.5" fill="#334155">2. scatter_add(e'_ij) &rarr; v'_i</text>
+        <text x="450" y="124" text-anchor="middle" font-size="10.5" fill="#334155">3. Node MLP + Residual</text>
+        <text x="450" y="146" text-anchor="middle" font-size="10" font-weight="600" fill="#dc2626">Irregular DRAM Gather/Scatter</text>
+
+        <line x1="548" y1="92" x2="573" y2="92" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI Decoder -->
+        <rect x="577" y="25" width="105" height="135" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="629" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Decoder</text>
+        <text x="629" y="82" text-anchor="middle" font-size="10.5" fill="#334155">Node MLP</text>
+        <text x="629" y="100" text-anchor="middle" font-size="10.5" fill="#334155">&rarr; Δu, Δp, Δx</text>
+        <text x="629" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#7c3aed">Dense GEMM</text>
+
+        <line x1="682" y1="92" x2="707" y2="92" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Non-AI Integrator -->
+        <rect x="711" y="25" width="95" height="135" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="758" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#115e59">NON-AI</text>
+        <text x="758" y="78" text-anchor="middle" font-size="10" fill="#334155">Euler update</text>
+        <text x="758" y="96" text-anchor="middle" font-size="10" fill="#334155">u += Δu</text>
+        <text x="758" y="114" text-anchor="middle" font-size="10" fill="#334155">Remesh / BC</text>
+        <text x="758" y="138" text-anchor="middle" font-size="9.5" font-weight="600" fill="#0d9488">Autoreg loop</text>
+
+        <!-- Legend -->
+        <rect x="150" y="190" width="14" height="14" rx="3" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+        <text x="170" y="201" font-size="11" fill="#334155">Non-AI Step</text>
+        <rect x="300" y="190" width="14" height="14" rx="3" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="320" y="201" font-size="11" fill="#334155">AI Dense MLP</text>
+        <rect x="460" y="190" width="14" height="14" rx="3" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+        <text x="480" y="201" font-size="11" fill="#334155">Irregular Graph Scatter-Gather Bottleneck</text>
+      </svg>
+      <p class="diagram-caption">
+        <strong>Figure 1:</strong> MeshGraphNets pipeline. Each rollout step executes 15 message-passing rounds over unstructured mesh edges, trading regular grid compute for irregular graph scatter-gather.
+      </p>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <h2>2.2.2 Computational Profiling &amp; Bottlenecks</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Metric / Aspect</th>
+          <th>Observed Benchmarks (Pfaff et al. ICLR 2021)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Hardware Used</strong></td>
+          <td>NVIDIA Tesla V100 GPUs (original TensorFlow implementation; PyTorch/PyG DDP ports scale across multi-GPU).</td>
+        </tr>
+        <tr>
+          <td><strong>Speedup vs. Classical</strong></td>
+          <td><strong>10–100&times; faster</strong> than ground-truth numerical solvers (COMSOL / OpenFOAM / ArcSim) across aerodynamics (cylinder/airfoil), structural deforming plates, and cloth—running in <strong>milliseconds per step (ms/step)</strong>.</td>
+        </tr>
+        <tr>
+          <td><strong>Primary Bottleneck: Scatter-Gather</strong></td>
+          <td>Unlike regular CNNs or Transformers, 15 rounds of edge-to-node aggregation (<code>scatter_add</code>) perform indirect indexed reads/atomic writes over unstructured mesh graphs, causing uncoalesced HBM accesses and low Tensor Core utilization.</td>
+        </tr>
+        <tr>
+          <td><strong>Memory Footprint</strong></td>
+          <td>Materializing edge feature tensors $[E, 128]$ across 15 message-passing layers dominates GPU memory (since $E \approx 6N$ in 3D tetrahedral meshes).</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section-card">
+    <h2>2.2.3 Dedicated Accelerators &amp; Compiler Stacks</h2>
+    <ul>
+      <li><strong>PyTorch Geometric (PyG) + Triton / Custom CUDA Kernels:</strong> Fused gather-GEMM-scatter kernels (avoiding materializing intermediate $[E, H]$ edge tensors in HBM) substantially reduce memory traffic.</li>
+      <li><strong>Graph-Aware Node Reordering (RCM / METIS):</strong> Reordering mesh vertices improves L2 cache locality during edge gathers and balances partitions in multi-GPU DDP training.</li>
+      <li><strong>Dedicated GNN Accelerators (e.g., EnGN, HyGCN, GraphCore IPU):</strong> Hardware with high on-chip SRAM, hardware scatter-reduce engines, and fine-grained SPMD execution naturally accelerates irregular message passing.</li>
+    </ul>
+  </section>
+
+  <div class="page-nav">
+    <a href="fno_neuraloperator.html">&larr; 2.2.2 Fourier Neural Operator (FNO)</a>
+    <a href="transolver_poseidon.html">2.2.4 Transolver &amp; Poseidon &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

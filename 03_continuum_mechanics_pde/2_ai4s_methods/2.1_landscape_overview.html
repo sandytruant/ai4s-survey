@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2.1 AI4S Landscape Overview — Continuum Mechanics PDEs</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script type="module" src="../../assets/app.js"></script>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 3: Continuum Mechanics PDEs</span> &rsaquo;
+    <span>2.1 AI4S Landscape Overview</span>
+  </nav>
+
+  <header class="hero">
+    <h1>2.1 AI4S Landscape for Continuum PDEs</h1>
+    <p class="subtitle">Four architectural families replacing iterative PDE solvers—and the non-AI preprocessing, meshing, and hybrid correction kernels that remain.</p>
+  </header>
+
+  <section class="section-card">
+    <h2>Four AI4S Paradigms &amp; Their Hardware Signatures</h2>
+    <div class="grid-2">
+      <div class="callout ai">
+        <span class="badge badge-ai">1. Physics-Informed Neural Networks (PINNs)</span>
+        <h3><a href="2.2_representative_methods/pinn_physicsnemo.html">PINNs &amp; NVIDIA PhysicsNeMo</a></h3>
+        <p>Represent $u_\theta(\mathbf{x}, t)$ as an MLP/coordinate network trained with PDE residuals via automatic differentiation. <strong>Compute profile:</strong> Higher-order autograd (<code>create_graph=True</code>) creates deep backward graphs and small-batch memory/kernel-launch bottlenecks.</p>
+      </div>
+
+      <div class="callout ai">
+        <span class="badge badge-ai">2. Neural Operators</span>
+        <h3><a href="2.2_representative_methods/fno_neuraloperator.html">Fourier Neural Operator (FNO)</a></h3>
+        <p>Learn mappings between function spaces by parameterizing linear integral kernels in Fourier space via FFT/iFFT. <strong>Compute profile:</strong> Dense 2D/3D FFT transposes (memory-BW/all-to-all bound) paired with batched complex GEMMs on truncated modes.</p>
+      </div>
+
+      <div class="callout ai">
+        <span class="badge badge-ai">3. Graph-Based Simulators</span>
+        <h3><a href="2.2_representative_methods/meshgraphnets.html">MeshGraphNets (GNN)</a></h3>
+        <p>Encode unstructured FEM/FVM meshes as graphs and run $L$ steps of learned message passing. <strong>Compute profile:</strong> Irregular <code>scatter_add</code> / gather across variable-degree edges—memory-bandwidth bound with poor spatial locality.</p>
+      </div>
+
+      <div class="callout ai">
+        <span class="badge badge-ai">4. PDE Foundation Models</span>
+        <h3><a href="2.2_representative_methods/transolver_poseidon.html">Transolver &amp; Poseidon</a></h3>
+        <p>Physics-Attention (Transolver) projects $N$ mesh points into $M \ll N$ physical slices for $O(N)$ linear attention; multiscale operator transformers (Poseidon) pretrain across PDE families. <strong>Compute profile:</strong> Tensor-Core-friendly dense GEMMs.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <h2>Amdahl's Law View: What AI Replaces vs. What Remains Non-AI</h2>
+    <p>
+      Even when AI achieves a $100\times$–$1000\times$ speedup on the core PDE time-stepping or Poisson solve, end-to-end engineering pipelines still rely on classical non-AI kernels for geometry, boundary enforcement, and physical conservation.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 210" width="820" height="210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AI vs Non-AI boundary in end-to-end PDE workflows">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+
+        <!-- Non-AI Pre -->
+        <rect x="15" y="30" width="175" height="115" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="102" y="55" text-anchor="middle" font-size="12" font-weight="700" fill="#115e59">NON-AI: Preprocessing</text>
+        <text x="102" y="78" text-anchor="middle" font-size="11" fill="#334155">CAD &amp; Mesh Gen</text>
+        <text x="102" y="96" text-anchor="middle" font-size="11" fill="#334155">SDF / Graph Build</text>
+        <text x="102" y="114" text-anchor="middle" font-size="11" fill="#334155">IC / BC Encoding</text>
+        <text x="102" y="134" text-anchor="middle" font-size="10" font-weight="600" fill="#0d9488">CPU-bound / Irregular</text>
+
+        <line x1="190" y1="87" x2="220" y2="87" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI Core -->
+        <rect x="225" y="20" width="350" height="135" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="400" y="45" text-anchor="middle" font-size="12.5" font-weight="700" fill="#5b21b6">AI SURROGATE: Replaces Iterative Solver</text>
+        <text x="400" y="68" text-anchor="middle" font-size="11" fill="#334155">Bypasses 10³–10⁵ CFL steps &amp; Krylov/AMG iterations</text>
+        <rect x="245" y="82" width="145" height="55" rx="6" fill="#ffffff" stroke="#c4b5fd"/>
+        <text x="317" y="104" text-anchor="middle" font-size="11" font-weight="700" fill="#5b21b6">Full Surrogate</text>
+        <text x="317" y="122" text-anchor="middle" font-size="10" fill="#475569">FNO / MGN / Transolver</text>
+        <rect x="410" y="82" width="145" height="55" rx="6" fill="#ffffff" stroke="#c4b5fd"/>
+        <text x="482" y="104" text-anchor="middle" font-size="11" font-weight="700" fill="#5b21b6">Hybrid AI-CFD</text>
+        <text x="482" y="122" text-anchor="middle" font-size="10" fill="#475569">Learned SGS / Precond</text>
+
+        <line x1="575" y1="87" x2="605" y2="87" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Non-AI Post -->
+        <rect x="610" y="30" width="195" height="115" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="707" y="55" text-anchor="middle" font-size="12" font-weight="700" fill="#115e59">NON-AI: Post / Verify</text>
+        <text x="707" y="78" text-anchor="middle" font-size="11" fill="#334155">Poisson Projection (∇·u=0)</text>
+        <text x="707" y="96" text-anchor="middle" font-size="11" fill="#334155">Lift / Drag Integration</text>
+        <text x="707" y="114" text-anchor="middle" font-size="11" fill="#334155">High-Fidelity CFD Signoff</text>
+        <text x="707" y="134" text-anchor="middle" font-size="10" font-weight="600" fill="#0d9488">FP64 Reductions / Stencils</text>
+
+        <!-- Legend -->
+        <rect x="220" y="172" width="14" height="14" rx="3" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="240" y="183" font-size="11" fill="#334155">AI Compute (GPU Tensor Cores / FFT / GNN)</text>
+        <rect x="500" y="172" width="14" height="14" rx="3" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+        <text x="520" y="183" font-size="11" fill="#334155">Non-AI Compute (Meshing, Projection, Signoff)</text>
+      </svg>
+      <p class="diagram-caption">
+        <strong>Figure 1:</strong> End-to-end AI4S PDE pipeline. As AI inference drops to milliseconds, CPU-side meshing, graph construction, and non-AI projection/integration become the new Amdahl's Law bottleneck.
+      </p>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <h2>Representative Methods Deep-Dive</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Primary Representation</th>
+          <th>Speedup vs. Classical</th>
+          <th>Key Hardware Bottleneck</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="2.2_representative_methods/pinn_physicsnemo.html"><strong>PINNs (PhysicsNeMo)</strong></a></td>
+          <td>Continuous coordinate MLP</td>
+          <td>Mesh-free; fast inference once trained</td>
+          <td>Higher-order autograd tape &amp; memory</td>
+        </tr>
+        <tr>
+          <td><a href="2.2_representative_methods/fno_neuraloperator.html"><strong>FNO (NeuralOperator)</strong></a></td>
+          <td>Regular grid + Fourier modes</td>
+          <td>Up to ~1,000&times; (Navier-Stokes)</td>
+          <td>2D/3D FFT all-to-all transposes</td>
+        </tr>
+        <tr>
+          <td><a href="2.2_representative_methods/meshgraphnets.html"><strong>MeshGraphNets</strong></a></td>
+          <td>Unstructured mesh graph</td>
+          <td>10–100&times; (ms/step on V100)</td>
+          <td>Irregular edge <code>scatter_add</code></td>
+        </tr>
+        <tr>
+          <td><a href="2.2_representative_methods/transolver_poseidon.html"><strong>Transolver &amp; Poseidon</strong></a></td>
+          <td>Physics slices / Multiscale ViT</td>
+          <td>1.3&times; over GNOT; $O(N)$ scaling</td>
+          <td>Slice projection &amp; foundation memory</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="page-nav">
+    <a href="../1_scientific_problem/1.3_compute_demand_and_impact.html">&larr; 1.3 Compute Demand &amp; Impact</a>
+    <a href="2.2_representative_methods/pinn_physicsnemo.html">2.2.1 PINNs &amp; PhysicsNeMo &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

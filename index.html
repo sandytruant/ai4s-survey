@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <title>AI4S Hardware &amp; Compiler Survey — Master Portal</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <script type="module" src="assets/app.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <h1>AI for Science (AI4S): An Accelerator Architecture &amp; Compiler Survey</h1>
+      <p class="subtitle">
+        A visual-first, systems-level survey of the three dominant computational pillars of AI4S—<strong>Electronic Structure</strong>,
+        <strong>Molecular Dynamics</strong>, and <strong>Continuum Mechanics PDEs</strong>—mapping physical equations to data structures,
+        Amdahl's Law boundaries, profiling bottlenecks, and dedicated hardware.
+      </p>
+    </header>
+
+    <div class="tabs">
+      <div class="tablist" role="tablist" focusgroup="tablist nomemory" aria-label="Survey views">
+        <button type="button" role="tab" id="tab-overview" aria-selected="true" focusgroupstart>Multi-Scale Overview</button>
+        <button type="button" role="tab" id="tab-matrix" aria-selected="false" tabindex="-1">Arch &amp; Compiler Matrix</button>
+        <button type="button" role="tab" id="tab-p1" aria-selected="false" tabindex="-1">1. Electronic Structure</button>
+        <button type="button" role="tab" id="tab-p2" aria-selected="false" tabindex="-1">2. Molecular Dynamics</button>
+        <button type="button" role="tab" id="tab-p3" aria-selected="false" tabindex="-1">3. Continuum PDEs</button>
+      </div>
+
+      <div role="tabpanel" aria-labelledby="tab-overview" tabindex="0">
+        <div class="tabpanel-inner">
+          <section class="section-card">
+            <h2>1. Multi-Scale Physical &amp; Computational Coupling</h2>
+            <p>
+              Scientific simulation spans orders of magnitude in space and time. Outputs from finer-scale quantum models parameterize atomic force fields,
+              which in turn yield constitutive material properties (viscosity, thermal conductivity, elastic moduli) for macroscopic continuum PDEs.
+              For hardware architects and compiler engineers, each scale exhibits distinct tensor shapes, memory access patterns, and AI-vs-classical bottlenecks.
+            </p>
+
+            <div class="diagram-box">
+              <svg viewBox="0 0 980 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Multi-scale AI4S computational pipeline">
+                <defs>
+                  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                  </marker>
+                </defs>
+
+                <!-- Pillar 1 -->
+                <rect x="20" y="25" width="285" height="205" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2" />
+                <text x="162" y="52" text-anchor="middle" font-size="15" font-weight="700" fill="#1e3a8a">1. Electronic Structure</text>
+                <text x="162" y="72" text-anchor="middle" font-size="12" fill="#475569">Scale: Å (10⁻¹⁰ m) · Quantum Electrons</text>
+                <rect x="36" y="88" width="253" height="44" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+                <text x="162" y="107" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Classical: O(N³) Eigensolve + 3D FFT</text>
+                <text x="162" y="123" text-anchor="middle" font-size="11" fill="#dc2626">FP64 Dense Linear Algebra + All-to-All</text>
+                <rect x="36" y="144" width="253" height="68" rx="6" fill="#f5f3ff" stroke="#7c3aed" />
+                <text x="162" y="164" text-anchor="middle" font-size="12" font-weight="700" fill="#5b21b6">AI4S Shift</text>
+                <text x="162" y="182" text-anchor="middle" font-size="11" fill="#334155">VMC Wavefunctions (Laplacian/KFAC)</text>
+                <text x="162" y="198" text-anchor="middle" font-size="11" fill="#334155">Equivariant H(R) + Neural XC</text>
+
+                <!-- Arrow 1->2 -->
+                <line x1="305" y1="128" x2="345" y2="128" stroke="#475569" stroke-width="2.2" marker-end="url(#arrow)" />
+                <text x="325" y="114" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569">E, F</text>
+                <text x="325" y="146" text-anchor="middle" font-size="10" fill="#475569">Labels</text>
+
+                <!-- Pillar 2 -->
+                <rect x="348" y="25" width="285" height="205" rx="10" fill="#f0fdfa" stroke="#0d9488" stroke-width="2" />
+                <text x="490" y="52" text-anchor="middle" font-size="15" font-weight="700" fill="#115e59">2. Molecular Dynamics (MD)</text>
+                <text x="490" y="72" text-anchor="middle" font-size="12" fill="#475569">Scale: nm–μm · fs–ms · Particle Systems</text>
+                <rect x="364" y="88" width="253" height="44" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+                <text x="490" y="107" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Classical: Neighbor Lists + PME FFT</text>
+                <text x="490" y="123" text-anchor="middle" font-size="11" fill="#dc2626">Irregular Gathers + &lt;86 μs/step Latency</text>
+                <rect x="364" y="144" width="253" height="68" rx="6" fill="#f5f3ff" stroke="#7c3aed" />
+                <text x="490" y="164" text-anchor="middle" font-size="12" font-weight="700" fill="#5b21b6">AI4S Shift</text>
+                <text x="490" y="182" text-anchor="middle" font-size="11" fill="#334155">MLIPs (DeePMD, Allegro, MACE, SevenNet)</text>
+                <text x="490" y="198" text-anchor="middle" font-size="11" fill="#334155">Clebsch-Gordan TP + Autograd Forces</text>
+
+                <!-- Arrow 2->3 -->
+                <line x1="633" y1="128" x2="673" y2="128" stroke="#475569" stroke-width="2.2" marker-end="url(#arrow)" />
+                <text x="653" y="114" text-anchor="middle" font-size="10.5" font-weight="600" fill="#475569">κ, μ, E</text>
+                <text x="653" y="146" text-anchor="middle" font-size="10" fill="#475569">Props</text>
+
+                <!-- Pillar 3 -->
+                <rect x="676" y="25" width="285" height="205" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="2" />
+                <text x="818" y="52" text-anchor="middle" font-size="15" font-weight="700" fill="#92400e">3. Continuum Mechanics PDEs</text>
+                <text x="818" y="72" text-anchor="middle" font-size="12" fill="#475569">Scale: mm–km · Grids &amp; Meshes</text>
+                <rect x="692" y="88" width="253" height="44" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+                <text x="818" y="107" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Classical: FDM / FVM / FEM Krylov</text>
+                <text x="818" y="123" text-anchor="middle" font-size="11" fill="#dc2626">Memory-Bound SpMV/Stencil + Allreduce</text>
+                <rect x="692" y="144" width="253" height="68" rx="6" fill="#f5f3ff" stroke="#7c3aed" />
+                <text x="818" y="164" text-anchor="middle" font-size="12" font-weight="700" fill="#5b21b6">AI4S Shift</text>
+                <text x="818" y="182" text-anchor="middle" font-size="11" fill="#334155">PINNs, FNO, MeshGraphNets, Transolver</text>
+                <text x="818" y="198" text-anchor="middle" font-size="11" fill="#334155">Higher-Order Autograd, 3D FFT, Attention</text>
+              </svg>
+              <div class="diagram-caption">
+                Cross-scale physical coupling and the shift in computational primitives from classical HPC kernels to AI4S workloads.
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="callout">
+                <h3>1. Electronic Structure</h3>
+                <p>High-dimensional PDEs &amp; $O(N^3)$ eigenvalue problems. AI replaces wavefunction ansatz, SCF iteration, or XC functionals.</p>
+                <p><a href="01_electronic_structure/1_scientific_problem/1.1_problem_overview.html">Start Pillar 1 &rarr;</a></p>
+              </div>
+              <div class="callout nonai">
+                <h3>2. Molecular Dynamics</h3>
+                <p>Particle time-integration at fs steps. MLIPs replace DFT force evaluations while neighbor search &amp; PME remain classical.</p>
+                <p><a href="02_molecular_dynamics/1_scientific_problem/1.1_problem_overview.html">Start Pillar 2 &rarr;</a></p>
+              </div>
+              <div class="callout warn">
+                <h3>3. Continuum PDEs</h3>
+                <p>Macroscopic grids &amp; meshes. PINNs, neural operators, and PDE transformers replace iterative Krylov/timestepping loops.</p>
+                <p><a href="03_continuum_mechanics_pde/1_scientific_problem/1.1_problem_overview.html">Start Pillar 3 &rarr;</a></p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div role="tabpanel" aria-labelledby="tab-matrix" hidden="until-found">
+        <div class="tabpanel-inner">
+          <section class="section-card">
+            <h2>Cross-Domain Architecture &amp; Compiler Comparison</h2>
+            <div class="table-wrapper" tabindex="0" role="region" aria-label="Cross-domain architecture and compiler comparison">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Dimension</th>
+                    <th scope="col">Pillar 1: Electronic Structure</th>
+                    <th scope="col">Pillar 2: Molecular Dynamics (MD)</th>
+                    <th scope="col">Pillar 3: Continuum Mechanics PDEs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Primary Data Structures</th>
+                    <td>3D uniform grids (plane waves), dense/sparse $N \times N$ matrices, Slater determinants</td>
+                    <td>Dynamic 3D point clouds, CSR neighbor lists ($r_c$), sparse radius graphs</td>
+                    <td>Structured grids (3D/4D tensors), unstructured FEM/FVM meshes (CSR/graphs)</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Classical Bottleneck</th>
+                    <td>$O(N^3)$ dense eigensolvers (ScaLAPACK/ELPA), 3D FFT <code>MPI_Alltoall</code>, SCF iterations</td>
+                    <td>Irregular neighbor gathers, PME 3D FFT latency, sub-100 $\mu$s/step strong-scaling wall</td>
+                    <td>Low arithmetic intensity (~0.1–0.5 FLOP/B SpMV/stencils), Krylov <code>MPI_Allreduce</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">What AI Replaces</th>
+                    <td>Wavefunction ansatz (VMC), iterative SCF loop (Hamiltonian $H$), analytical XC functional</td>
+                    <td>DFT / empirical potential &amp; force evaluation $E(\mathbf{R}), -\nabla E$</td>
+                    <td>Iterative PDE time-stepping, Krylov/Multigrid linear solves, surrogate parametric sweeps</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Remaining Non-AI Kernels</th>
+                    <td>1-shot $HC=SCE$ eigensolve, basis overlap integrals, MCMC sampling, Laplacian $\nabla^2\psi$</td>
+                    <td>Neighbor search &amp; PBC wrapping, Verlet integration, thermostats, PME electrostatics, MPI halo</td>
+                    <td>Mesh/SDF generation, Poisson divergence projection, boundary enforcement, engineering signoff</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Dominant AI Bottlenecks</th>
+                    <td>Second-order Laplacian AD, KFAC inversions, Clebsch-Gordan tensor products (TP)</td>
+                    <td>Equivariant TP (<code>e3nn</code>) memory/bandwidth, backward force autograd, per-layer MPI halo</td>
+                    <td>2nd-order AD tape bloat (PINNs), 3D FFT transposes (FNO), irregular <code>scatter_add</code> (GNNs)</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Precision Sensitivity</th>
+                    <td>High: FP64 often needed for eigensolve/VMC; BF16/FP32 for GNN descriptors</td>
+                    <td>Mixed: FP32/BF16 for MLP/TP descriptors; FP64 for trajectory accumulation &amp; virials</td>
+                    <td>Mixed: BF16/FP32 for surrogate inference; FP64 for stiff classical hybrid/signoff</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Dedicated Accelerators &amp; Compilers</th>
+                    <td>TPU/GPU KFAC, Forward Laplacian (<code>folx</code>), <code>cuEquivariance</code>, <code>GPU4PySCF</code></td>
+                    <td><strong>Anton 1/2/3</strong>, <strong>MDGRAPE-4</strong>, FPGA MD, <code>cuEquivariance</code>, <code>FlashTP</code>, Sunway/Fugaku</td>
+                    <td><strong>Cerebras WSE-2/WSE-3</strong>, NVIDIA PhysicsNeMo + Warp + <code>cuFFTDx</code>, FPGA/CGRA stencils</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div role="tabpanel" aria-labelledby="tab-p1" hidden="until-found">
+        <div class="tabpanel-inner">
+          <section class="section-card">
+            <h2>Pillar 1: Electronic Structure (Complex PDEs &amp; Eigenvalue Problems)</h2>
+            <div class="grid-2">
+              <div class="callout">
+                <h3>1. Scientific Problem</h3>
+                <ul>
+                  <li><a href="01_electronic_structure/1_scientific_problem/1.1_problem_overview.html">1.1 Problem Overview</a> — Born-Oppenheimer PES, $3N$-D wavefunctions vs. 3D Kohn-Sham DFT.</li>
+                  <li><a href="01_electronic_structure/1_scientific_problem/1.2_classical_methods_and_bottlenecks.html">1.2 Classical Methods &amp; Bottlenecks</a> — $O(N^3)$ eigensolvers, 3D FFTs, SCF loop.</li>
+                  <li><a href="01_electronic_structure/1_scientific_problem/1.3_compute_demand_and_impact.html">1.3 Compute Demand &amp; Impact</a> — Supercomputer shares &amp; accuracy-size trade-offs.</li>
+                </ul>
+              </div>
+              <div class="callout ai">
+                <h3>2. AI4S Methods &amp; Profiling</h3>
+                <ul>
+                  <li><a href="01_electronic_structure/2_ai4s_methods/2.1_landscape_overview.html">2.1 Landscape Overview</a> — VMC, Hamiltonian prediction, Neural XC.</li>
+                  <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/ferminet_psiformer.html">2.2 FermiNet &amp; Psiformer</a> — Forward Laplacian (<code>folx</code>), KFAC, JAX/TPU.</li>
+                  <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/deeph_e3.html">2.2 DeepH-E3</a> — Equivariant $H(\mathbf{R})$, 1-shot sparse eigensolve.</li>
+                  <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/qhnet.html">2.2 QHNet</a> — 92% fewer tensor products, Amdahl shift to $HC=SCE$.</li>
+                  <li><a href="01_electronic_structure/2_ai4s_methods/2.2_representative_methods/dm21_skala.html">2.2 DM21 &amp; Skala</a> — Neural XC inside SCF, <code>GPU4PySCF</code> &amp; <code>GauXC</code>.</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div role="tabpanel" aria-labelledby="tab-p2" hidden="until-found">
+        <div class="tabpanel-inner">
+          <section class="section-card">
+            <h2>Pillar 2: Molecular Dynamics (Particle System Simulation)</h2>
+            <div class="grid-2">
+              <div class="callout nonai">
+                <h3>1. Scientific Problem</h3>
+                <ul>
+                  <li><a href="02_molecular_dynamics/1_scientific_problem/1.1_problem_overview.html">1.1 Problem Overview</a> — Velocity Verlet integration, cutoff radius $r_c$, CSR neighbor lists.</li>
+                  <li><a href="02_molecular_dynamics/1_scientific_problem/1.2_classical_methods_and_bottlenecks.html">1.2 Classical Methods &amp; Bottlenecks</a> — Empirical MD vs. AIMD, PME 3D FFTs, gather irregularity.</li>
+                  <li><a href="02_molecular_dynamics/1_scientific_problem/1.3_compute_demand_and_impact.html">1.3 Compute Demand &amp; Impact</a> — Sub-86 $\mu$s/step latency wall for $\mu$s/day biological timescales.</li>
+                </ul>
+              </div>
+              <div class="callout ai">
+                <h3>2. AI4S Methods &amp; Profiling</h3>
+                <ul>
+                  <li><a href="02_molecular_dynamics/2_ai4s_methods/2.1_landscape_overview.html">2.1 Landscape Overview</a> — MLIPs vs. remaining classical neighbor/PME/Verlet kernels.</li>
+                  <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/deepmd_kit.html">2.2 DeePMD-kit</a> — Summit Gordon Bell &amp; Fugaku SC24 scaling, Anton/MDGRAPE context.</li>
+                  <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/nequip_allegro.html">2.2 NequIP &amp; Allegro</a> — Strictly local edge tensor products avoiding halo blowup.</li>
+                  <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/mace.html">2.2 MACE</a> — Higher-body-order ACE contraction &amp; <code>NVIDIA/cuEquivariance</code>.</li>
+                  <li><a href="02_molecular_dynamics/2_ai4s_methods/2.2_representative_methods/sevennet.html">2.2 SevenNet</a> — Multi-GPU spatial decomposition &amp; <code>FlashTP</code> fused kernels.</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div role="tabpanel" aria-labelledby="tab-p3" hidden="until-found">
+        <div class="tabpanel-inner">
+          <section class="section-card">
+            <h2>Pillar 3: Macroscopic Continuum Mechanics PDEs</h2>
+            <div class="grid-2">
+              <div class="callout warn">
+                <h3>1. Scientific Problem</h3>
+                <ul>
+                  <li><a href="03_continuum_mechanics_pde/1_scientific_problem/1.1_problem_overview.html">1.1 Problem Overview</a> — Navier-Stokes, elasticity, heat, Maxwell; grids vs. meshes.</li>
+                  <li><a href="03_continuum_mechanics_pde/1_scientific_problem/1.2_classical_methods_and_bottlenecks.html">1.2 Classical Methods &amp; Bottlenecks</a> — Roofline memory wall, SpMV/stencil AI, Krylov reductions.</li>
+                  <li><a href="03_continuum_mechanics_pde/1_scientific_problem/1.3_compute_demand_and_impact.html">1.3 Compute Demand &amp; Impact</a> — $Re^3$ DNS scaling &amp; parametric design sweeps.</li>
+                </ul>
+              </div>
+              <div class="callout ai">
+                <h3>2. AI4S Methods &amp; Profiling</h3>
+                <ul>
+                  <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.1_landscape_overview.html">2.1 Landscape Overview</a> — PINNs, Neural Operators, GNNs, PDE Foundation Models.</li>
+                  <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/pinn_physicsnemo.html">2.2 PINNs &amp; PhysicsNeMo</a> — Higher-order AD tape bottlenecks, <code>torch.compile</code> &amp; Warp.</li>
+                  <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/fno_neuraloperator.html">2.2 Fourier Neural Operator</a> — 3D FFT transposes, <code>cuFFTDx</code>, TFNO, FPGA streaming FFT.</li>
+                  <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/meshgraphnets.html">2.2 MeshGraphNets</a> — Unstructured <code>scatter_add</code> bandwidth &amp; RCM/Triton fusion.</li>
+                  <li><a href="03_continuum_mechanics_pde/2_ai4s_methods/2.2_representative_methods/transolver_poseidon.html">2.2 Transolver &amp; Poseidon</a> — $O(N)$ Physics-Attention &amp; Cerebras WSE / FPGA/CGRA synthesis.</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

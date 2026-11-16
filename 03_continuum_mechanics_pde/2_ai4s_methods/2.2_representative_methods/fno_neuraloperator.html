@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fourier Neural Operator (FNO) — Continuum Mechanics PDEs</title>
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <script type="module" src="../../../assets/app.js"></script>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 3: Continuum Mechanics PDEs</span> &rsaquo;
+    <a href="../2.1_landscape_overview.html">2.1 Landscape</a> &rsaquo;
+    <span>Fourier Neural Operator (FNO)</span>
+  </nav>
+
+  <header class="hero">
+    <h1>Fourier Neural Operator (FNO)</h1>
+    <p class="subtitle">Resolution-invariant operator learning in frequency space—replacing iterative Navier-Stokes solvers with FFTs and complex mode contractions.</p>
+    <p style="margin-top:0.75rem;">
+      <span class="badge badge-ai">Spectral Neural Operator</span>
+      <a href="https://arxiv.org/abs/2010.08895" target="_blank">Li et al. ICLR 2021 (arXiv:2010.08895)</a> &bull;
+      <a href="https://github.com/neuraloperator/neuraloperator" target="_blank">GitHub: neuraloperator/neuraloperator</a> &bull;
+      <a href="https://github.com/ixScience/fourier_neural_operator" target="_blank">Original FNO Repo</a>
+    </p>
+  </header>
+
+  <section class="section-card">
+    <h2>2.2.1 Overall Workflow</h2>
+    <p>
+      Instead of learning a finite-dimensional vector mapping on a fixed mesh, FNO learns an operator $\mathcal{G}_\theta: \mathcal{A} \to \mathcal{U}$ between infinite-dimensional function spaces. Each Fourier Layer lifts the spatial field to $C$ channels, applies a global convolution in frequency space via Fast Fourier Transform (FFT), truncates to $k_{\max}$ low-frequency modes, multiplies by learned complex weights $R_\theta$, and transforms back via inverse FFT alongside a local $1\times 1$ linear bypass $W$.
+    </p>
+
+    <div class="equation-box">
+      $$v_{t+1}(x) = \sigma\Big( W v_t(x) + \mathcal{F}^{-1}\big( R_\theta \cdot (\mathcal{F} v_t)(k) \big)(x) \Big)$$
+    </div>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 230" width="820" height="230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FNO workflow highlighting FFT, spectral mode contraction, and Non-AI grid interpolation">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+
+        <!-- Non-AI Pre -->
+        <rect x="15" y="30" width="145" height="135" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="87" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#115e59">NON-AI: Grid Prep</text>
+        <text x="87" y="76" text-anchor="middle" font-size="10.5" fill="#334155">Resample CAD/mesh</text>
+        <text x="87" y="94" text-anchor="middle" font-size="10.5" fill="#334155">onto regular grid</text>
+        <text x="87" y="112" text-anchor="middle" font-size="10.5" fill="#334155">[B, C_in, Nx, Ny, Nz]</text>
+        <text x="87" y="142" text-anchor="middle" font-size="10" font-weight="600" fill="#0d9488">Regular Tensor</text>
+
+        <line x1="160" y1="97" x2="185" y2="97" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI FNO Block -->
+        <rect x="190" y="15" width="445" height="165" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="412" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#5b21b6">AI: Fourier Layer (&times;4 layers)</text>
+
+        <!-- Upper path: FFT -> R -> iFFT -->
+        <rect x="208" y="48" width="110" height="52" rx="6" fill="#fef2f2" stroke="#dc2626"/>
+        <text x="263" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="#991b1b">3D rFFTn</text>
+        <text x="263" y="88" text-anchor="middle" font-size="9.5" fill="#475569">All-to-all transpose</text>
+
+        <line x1="318" y1="74" x2="342" y2="74" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <rect x="346" y="48" width="135" height="52" rx="6" fill="#ffffff" stroke="#7c3aed"/>
+        <text x="413" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="#5b21b6">Truncate &amp; R_θ · F</text>
+        <text x="413" y="88" text-anchor="middle" font-size="9.5" fill="#475569">Complex Einsum GEMM</text>
+
+        <line x1="481" y1="74" x2="505" y2="74" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <rect x="509" y="48" width="110" height="52" rx="6" fill="#fef2f2" stroke="#dc2626"/>
+        <text x="564" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="#991b1b">3D irFFTn</text>
+        <text x="564" y="88" text-anchor="middle" font-size="9.5" fill="#475569">Back to spatial grid</text>
+
+        <!-- Lower path: W bypass -->
+        <rect x="290" y="118" width="245" height="44" rx="6" fill="#ffffff" stroke="#7c3aed"/>
+        <text x="412" y="138" text-anchor="middle" font-size="11" font-weight="600" fill="#5b21b6">Local 1&times;1 Conv / Linear Bypass (W · v_t) + GeLU</text>
+        <text x="412" y="153" text-anchor="middle" font-size="9.5" fill="#475569">Captures high-frequency / non-periodic boundary features</text>
+
+        <line x1="635" y1="97" x2="660" y2="97" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Non-AI Post -->
+        <rect x="665" y="30" width="140" height="135" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="735" y="52" text-anchor="middle" font-size="11.5" font-weight="700" fill="#115e59">NON-AI: Post-Proc</text>
+        <text x="735" y="76" text-anchor="middle" font-size="10.5" fill="#334155">Project back to CAD</text>
+        <text x="735" y="94" text-anchor="middle" font-size="10.5" fill="#334155">Enforce div-free / BC</text>
+        <text x="735" y="112" text-anchor="middle" font-size="10.5" fill="#334155">Compute drag / flux</text>
+        <text x="735" y="142" text-anchor="middle" font-size="10" font-weight="600" fill="#0d9488">~1,000&times; speedup</text>
+
+        <!-- Legend -->
+        <rect x="160" y="196" width="14" height="14" rx="3" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+        <text x="180" y="207" font-size="11" fill="#334155">Non-AI Step</text>
+        <rect x="310" y="196" width="14" height="14" rx="3" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="330" y="207" font-size="11" fill="#334155">AI Complex GEMM / Linear</text>
+        <rect x="520" y="196" width="14" height="14" rx="3" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+        <text x="540" y="207" font-size="11" fill="#334155">FFT Memory/Transpose Bottleneck</text>
+      </svg>
+      <p class="diagram-caption">
+        <strong>Figure 1:</strong> FNO computational pipeline. Global spatial mixing is performed via 2D/3D FFTs and truncated complex tensor contractions, eliminating iterative Poisson solves.
+      </p>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <h2>2.2.2 Computational Profiling &amp; Bottlenecks</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Metric / Aspect</th>
+          <th>Published Benchmarks (Li et al. ICLR 2021 / NeuralOperator)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Speedup vs. Classical</strong></td>
+          <td>Up to <strong>~1,000&times; faster</strong> than traditional numerical PDE solvers on 2D turbulent Navier-Stokes (evaluating in <strong>&lt;10–50 ms</strong> on GPU vs. minutes–hours in OpenFOAM/spectral solvers).</td>
+        </tr>
+        <tr>
+          <td><strong>Zero-Shot Super-Resolution</strong></td>
+          <td>Trained on $64\times 64$ grids and evaluated directly on $256\times 256$ or higher grids without retraining because weights $R_\theta$ live in truncated Fourier modes.</td>
+        </tr>
+        <tr>
+          <td><strong>Primary Bottleneck: 3D FFT</strong></td>
+          <td><code>torch.fft.rfftn</code> / <code>irfftn</code> has low arithmetic intensity ($O(N \log N)$ ops) and requires multi-dimensional axis transposes, making it <strong>memory-bandwidth bound</strong> on single GPUs and <strong>all-to-all communication bound</strong> across multi-GPU domain decompositions.</td>
+        </tr>
+        <tr>
+          <td><strong>Complex Tensor Contractions</strong></td>
+          <td>The spectral multiplication $R_\theta \cdot (\mathcal{F} v_t)$ uses complex-valued <code>einsum</code> over $[B, C_{\text{in}}, C_{\text{out}}, k_x, k_y, k_z]$—which historically lacked native FP16 Tensor Core support compared to real GEMMs.</td>
+        </tr>
+        <tr>
+          <td><strong>Regular Grid Limitation</strong></td>
+          <td>Vanilla FNO requires uniform Cartesian grids; irregular industrial geometries require Geo-FNO learned coordinate deformations or interpolation overhead.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section-card">
+    <h2>2.2.3 Dedicated Accelerators &amp; Compiler Stacks</h2>
+    <ul>
+      <li><strong>NVIDIA cuFFTDx + Warp:</strong> Device-side FFT library allowing compilers to fuse 2D/3D FFT, mode truncation, complex einsum, and inverse FFT inside shared memory / registers—avoiding intermediate HBM round-trips.</li>
+      <li><strong>Tensorized FNO (TFNO) in <code>neuraloperator</code>:</strong> Uses Tucker/CP tensor decompositions on $R_\theta$ to cut parameter memory and improve cache locality.</li>
+      <li><strong>FPGA / CGRA Streaming FFT Pipelines:</strong> Spatial dataflow architectures (e.g., 2D systolic FFTs on Xilinx/Intel FPGAs) keep butterfly stages on-chip, bypassing DRAM transpose bottlenecks.</li>
+      <li><strong>Distributed Multi-GPU (<code>ShardTensor</code> / Megatron-style):</strong> Spatial slab/pencil decompositions overlap <code>MPI_Alltoall</code> FFT transposes with local $1\times 1$ convolutions.</li>
+    </ul>
+  </section>
+
+  <div class="page-nav">
+    <a href="pinn_physicsnemo.html">&larr; 2.2.1 PINNs &amp; PhysicsNeMo</a>
+    <a href="meshgraphnets.html">2.2.3 MeshGraphNets &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

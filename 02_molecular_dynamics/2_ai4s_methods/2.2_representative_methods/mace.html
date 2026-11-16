@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MACE — Representative AI4S Method | AI4S Survey</title>
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <script type="module" src="../../../assets/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 2: Molecular Dynamics</span> &rsaquo;
+    <a href="../2.1_landscape_overview.html">2.1 Landscape</a> &rsaquo;
+    <strong>MACE</strong>
+  </nav>
+
+  <header class="hero">
+    <h1>MACE: Higher-Body-Order Equivariant Message Passing</h1>
+    <p class="subtitle">Combining Atomic Cluster Expansion (ACE) symmetric contractions with 2-layer $E(3)$-equivariant MPNNs, accelerated 3–5&times; by NVIDIA cuEquivariance.</p>
+    <p style="margin-top:0.75rem;">
+      <span class="badge badge-ai">Many-Body Equivariant MPNN</span>
+      <span class="badge badge-hw">cuEquivariance / A100 / H100</span>
+      &nbsp;|&nbsp;
+      <a href="https://github.com/ACEsuit/mace" target="_blank">GitHub: ACEsuit/mace</a>
+      &nbsp;|&nbsp;
+      <a href="https://arxiv.org/abs/2206.07697" target="_blank">NeurIPS 2022 Paper (arXiv:2206.07697)</a>
+    </p>
+  </header>
+
+  <div class="section-card">
+    <h2>2.2.1 Overall Workflow: AI vs. Non-AI Pipeline</h2>
+    <p>
+      Standard MPNNs pass only 2-body messages per layer, requiring 4–6 layers to capture many-body geometry. <strong>MACE</strong> pools 2-body edge messages onto each node $i$ and applies a <strong>symmetric tensor contraction</strong> (from ACE, up to body-order $\nu = 3$ or $4$) inside each layer. This achieves high accuracy with just <strong>2 message-passing layers</strong>, shrinking the receptive field from $5\cdot r_c$ to $2\cdot r_c$.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 215" width="820" height="215" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+        <!-- Non-AI 1 -->
+        <rect x="15" y="30" width="140" height="95" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="85" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">Non-AI: ASE/LAMMPS</text>
+        <text x="85" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Neighbor Graph</text>
+        <text x="85" y="90" text-anchor="middle" font-size="10.5" fill="#475569">PBC Shift Vectors</text>
+        <text x="85" y="106" text-anchor="middle" font-size="10.5" fill="#0d9488">2-Hop Halo (2·r_c)</text>
+
+        <line x1="155" y1="77" x2="180" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI 1 -->
+        <rect x="185" y="30" width="160" height="95" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="265" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: 2-Body Messages</text>
+        <text x="265" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Radial MLP + Y_l^m</text>
+        <text x="265" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Edge Tensor Product</text>
+        <text x="265" y="106" text-anchor="middle" font-size="10.5" fill="#7c3aed">Scatter-Sum → A_i</text>
+
+        <line x1="345" y1="77" x2="370" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI 2 -->
+        <rect x="375" y="30" width="175" height="95" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="462" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: ACE Contraction</text>
+        <text x="462" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Symmetric Tensor Prod.</text>
+        <text x="462" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Body-Order ν=3,4 (2×)</text>
+        <text x="462" y="106" text-anchor="middle" font-size="10.5" fill="#7c3aed">cuEquivariance Fused</text>
+
+        <line x1="550" y1="77" x2="575" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI 3 -->
+        <rect x="580" y="30" width="115" height="95" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="637" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Readout</text>
+        <text x="637" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Linear / MLP → E_i</text>
+        <text x="637" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Autograd ∂E/∂r_i</text>
+        <text x="637" y="106" text-anchor="middle" font-size="10.5" fill="#7c3aed">BF16/FP32 Mixed</text>
+
+        <line x1="695" y1="77" x2="715" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Non-AI 2 -->
+        <rect x="720" y="30" width="85" height="95" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="762" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">Non-AI</text>
+        <text x="762" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Verlet</text>
+        <text x="762" y="90" text-anchor="middle" font-size="10.5" fill="#475569">D3 Disp.</text>
+        <text x="762" y="106" text-anchor="middle" font-size="10.5" fill="#0d9488">PBC</text>
+
+        <rect x="15" y="148" width="790" height="45" rx="6" fill="#f5f3ff" stroke="#ddd6fe"/>
+        <text x="410" y="175" text-anchor="middle" font-size="11.5" fill="#5b21b6">
+          <strong>Foundation Model Role:</strong> MACE-MP-0 and MACE-OFF23 serve as universal pretrained potentials across the periodic table and organic molecules.
+        </text>
+      </svg>
+      <div class="diagram-caption">Figure 1: MACE 2-layer many-body equivariant pipeline.</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>2.2.2 Computational Profiling &amp; Bottlenecks</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Backend / Precision</th>
+          <th>Hardware</th>
+          <th>Published Speedup (vs. Baseline <code>e3nn</code>)</th>
+          <th>Bottleneck Addressed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>NVIDIA <code>cuEquivariance</code></strong><br>(<code>enable_cueq=True</code>)</td>
+          <td>NVIDIA A100 / H100</td>
+          <td><strong>~3&times; to 5&times;</strong> end-to-end inference &amp; training speedup (<code>MACE-MP Large</code>, <code>MACE-OFF Large</code>)</td>
+          <td>Replaces fragmented <code>e3nn</code> PyTorch ops with fused Segmented Tensor Product CUDA kernels; eliminates scattered DRAM reads &amp; kernel launch overhead.</td>
+        </tr>
+        <tr>
+          <td><strong>Mixed Precision + <code>cuEquivariance</code></strong></td>
+          <td>NVIDIA A100 / H100</td>
+          <td><strong>Additional ~4&times;</strong> speedup over FP32 <code>cuEquivariance</code></td>
+          <td>Casts linear layers to <code>BF16</code>/<code>FP16</code> while keeping accumulations and critical radial/force paths in <code>FP32</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <strong>Compiler &amp; Memory Bottlenecks:</strong> In standard <code>e3nn</code> execution, sparse tensor contractions and scatter-gather message passing suffer from severe kernel launch latency (often &gt;50% idle GPU time on small systems) and large autograd activation footprints.
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>2.2.3 Dedicated Accelerators &amp; Kernel Libraries</h2>
+    <ul>
+      <li><strong>NVIDIA <code>cuEquivariance</code> (<a href="https://github.com/NVIDIA/cuEquivariance" target="_blank">NVIDIA/cuEquivariance</a>):</strong> Dedicated CUDA library of Segmented Tensor Products and symmetric contraction primitives natively integrated into MACE (&ge; v0.3.11).</li>
+      <li><strong><code>OpenEquivariance</code> &amp; <code>FlashTP</code>:</strong> Open-source portable CUDA/HIP/PyTorch kernels targeting Clebsch-Gordan tensor products and symmetric contractions across NVIDIA and AMD GPUs.</li>
+    </ul>
+  </div>
+
+  <div class="page-nav">
+    <a href="nequip_allegro.html">&larr; 2.2.2 NequIP &amp; Allegro</a>
+    <a href="sevennet.html">2.2.4 SevenNet (+ FlashTP) &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PINNs &amp; NVIDIA PhysicsNeMo — Continuum Mechanics PDEs</title>
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <script type="module" src="../../../assets/app.js"></script>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 3: Continuum Mechanics PDEs</span> &rsaquo;
+    <a href="../2.1_landscape_overview.html">2.1 Landscape</a> &rsaquo;
+    <span>PINNs &amp; PhysicsNeMo</span>
+  </nav>
+
+  <header class="hero">
+    <h1>PINNs &amp; NVIDIA PhysicsNeMo</h1>
+    <p class="subtitle">Mesh-free continuous PDE surrogates trained via higher-order automatic differentiation of governing equations.</p>
+    <p style="margin-top:0.75rem;">
+      <span class="badge badge-ai">Coordinate MLP / Autograd PDE</span>
+      <a href="https://arxiv.org/abs/1711.10561" target="_blank">Raissi et al. (arXiv:1711.10561)</a> &bull;
+      <a href="https://doi.org/10.1016/j.jcp.2018.10.045" target="_blank">JCP 2019 DOI</a> &bull;
+      <a href="https://github.com/NVIDIA/physicsnemo" target="_blank">GitHub: NVIDIA/physicsnemo</a> &bull;
+      <a href="https://docs.nvidia.com/physicsnemo/latest/" target="_blank">PhysicsNeMo Docs</a>
+    </p>
+  </header>
+
+  <section class="section-card">
+    <h2>2.2.1 Overall Workflow</h2>
+    <p>
+      Physics-Informed Neural Networks (PINNs) parameterize the solution field $u_\theta(\mathbf{x}, t)$ as a neural network mapping continuous coordinates $(\mathbf{x}, t) \in \mathbb{R}^{d+1}$ to physical quantities $(\mathbf{u}, p, T)$. Instead of generating a volumetric mesh, NVIDIA PhysicsNeMo (<code>physicsnemo.sym</code>, formerly Modulus) samples collocation points inside the CAD geometry and minimizes a composite loss of boundary conditions and symbolic PDE residuals.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 220" width="820" height="220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PINN workflow showing Non-AI geometry sampling vs AI autograd PDE residual">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+
+        <!-- Step 1: Non-AI -->
+        <rect x="15" y="25" width="165" height="130" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="97" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#115e59">NON-AI: CAD &amp; Sampling</text>
+        <text x="97" y="72" text-anchor="middle" font-size="10.5" fill="#334155">1. Parse STL/CAD</text>
+        <text x="97" y="90" text-anchor="middle" font-size="10.5" fill="#334155">2. Sample collocation</text>
+        <text x="97" y="106" text-anchor="middle" font-size="10.5" fill="#334155">points (x, t) + SDF</text>
+        <text x="97" y="135" text-anchor="middle" font-size="10" font-weight="600" fill="#0d9488">Mesh-free point cloud</text>
+
+        <line x1="180" y1="90" x2="208" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Step 2: AI Forward -->
+        <rect x="212" y="25" width="175" height="130" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="299" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Coordinate MLP</text>
+        <text x="299" y="72" text-anchor="middle" font-size="10.5" fill="#334155">Fourier feature embed</text>
+        <text x="299" y="90" text-anchor="middle" font-size="10.5" fill="#334155">SiLU / tanh MLP layers</text>
+        <text x="299" y="108" text-anchor="middle" font-size="10.5" fill="#334155">Output u_θ(x, t), p_θ</text>
+        <text x="299" y="135" text-anchor="middle" font-size="10" font-weight="600" fill="#7c3aed">Dense GEMM [B, H]</text>
+
+        <line x1="387" y1="90" x2="415" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Step 3: AI Higher-Order Autograd -->
+        <rect x="419" y="25" width="205" height="130" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+        <text x="521" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#991b1b">AI BOTTLENECK: Autograd</text>
+        <text x="521" y="72" text-anchor="middle" font-size="10.5" fill="#334155">1st deriv: ∂u/∂t, ∇u</text>
+        <text x="521" y="90" text-anchor="middle" font-size="10.5" fill="#334155">2nd deriv: ∇²u (create_graph)</text>
+        <text x="521" y="108" text-anchor="middle" font-size="10.5" fill="#334155">PDE Loss: ||R(u_θ)||² + BC</text>
+        <text x="521" y="135" text-anchor="middle" font-size="10" font-weight="600" fill="#dc2626">3rd-order tape for backprop!</text>
+
+        <line x1="624" y1="90" x2="652" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Step 4: Non-AI Evaluation -->
+        <rect x="656" y="25" width="150" height="130" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="731" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#115e59">NON-AI: Post-Proc</text>
+        <text x="731" y="75" text-anchor="middle" font-size="10.5" fill="#334155">Evaluate on VTK grid</text>
+        <text x="731" y="93" text-anchor="middle" font-size="10.5" fill="#334155">Surface flux / drag</text>
+        <text x="731" y="111" text-anchor="middle" font-size="10.5" fill="#334155">Physical consistency</text>
+        <text x="731" y="135" text-anchor="middle" font-size="10" font-weight="600" fill="#0d9488">Inference in ms</text>
+
+        <!-- Legend -->
+        <rect x="130" y="178" width="14" height="14" rx="3" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+        <text x="150" y="189" font-size="11" fill="#334155">Non-AI Step</text>
+        <rect x="290" y="178" width="14" height="14" rx="3" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="310" y="189" font-size="11" fill="#334155">AI Forward / Optim</text>
+        <rect x="490" y="178" width="14" height="14" rx="3" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+        <text x="510" y="189" font-size="11" fill="#334155">AI Autograd Bottleneck (2nd/3rd-order backward)</text>
+      </svg>
+      <p class="diagram-caption">
+        <strong>Figure 1:</strong> PINN training pipeline in PhysicsNeMo. Computing second-order PDE residuals ($\nabla^2 u$) requires retaining the computation graph (<code>create_graph=True</code>), turning optimizer backprop into a 3rd-order differentiation sweep.
+      </p>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <h2>2.2.2 Computational Profiling &amp; Bottlenecks</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Metric / Aspect</th>
+          <th>Observed Characteristics (Raissi et al. / PhysicsNeMo Docs)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Hardware &amp; Scaling</strong></td>
+          <td>PyTorch + CUDA GPUs; PhysicsNeMo supports multi-GPU / multi-node scaling via <code>ShardTensor</code> domain parallelism and <code>torch.compile</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>Inference vs. Training</strong></td>
+          <td>Once trained, forward evaluation is a single MLP pass (milliseconds on GPU), avoiding iterative linear solves. However, <strong>training</strong> is slow and must be re-run when geometry/BCs change unless parameterized.</td>
+        </tr>
+        <tr>
+          <td><strong>Primary Bottleneck: Higher-Order Autograd</strong></td>
+          <td>Computing $\nabla^2 u$ for Navier-Stokes or elasticity requires nested reverse-mode AD (<code>create_graph=True</code>). The intermediate activation tape grows rapidly, capping collocation batch size in GPU HBM and incurring heavy Python/kernel-launch overhead.</td>
+        </tr>
+        <tr>
+          <td><strong>Precision &amp; Conditioning</strong></td>
+          <td>Smooth activations (<code>SiLU</code>, <code>tanh</code>) and PDE residual sums often require FP32 (or TF32/FP64 for stiff boundary layers); multi-scale loss terms compete during gradient descent.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <strong>Compiler Insight:</strong> Standard eager PyTorch autograd launches dozens of tiny elementwise kernels for second-order derivatives. Fusing the forward MLP and symbolic derivative graph via <code>torch.compile</code>, JAX (<code>jax.grad</code> + <code>jax.vmap</code>), or Separable PINNs (SPINNs) dramatically reduces HBM traffic and launch latency.
+    </div>
+  </section>
+
+  <section class="section-card">
+    <h2>2.2.3 Dedicated Accelerators &amp; Compiler Stacks</h2>
+    <ul>
+      <li><strong>NVIDIA PhysicsNeMo + <code>torch.compile</code> + Nsight Systems:</strong> Built-in kernel fusion, GPU-optimized layers, and Nsight profiling harnesses for tracing autograd hotspots.</li>
+      <li><strong>JAX / XLA (<code>jax.jvp</code> / <code>vjp</code> + <code>vmap</code>):</strong> Ahead-of-time XLA whole-graph compilation fuses higher-order Taylor-mode / forward-over-reverse AD into single GPU kernels, eliminating Python tape overhead.</li>
+      <li><strong>NVIDIA Warp (<code>warp.fem</code>):</strong> Python-to-CUDA JIT compiler for hybrid physics-ML where exact FEM/stencil derivatives replace expensive AD tapes.</li>
+      <li><strong>Tensor Cores (TF32 / BF16) vs. FP32:</strong> MLP layers map well to Tensor Cores, though higher-order derivative accumulation typically stays in FP32 to avoid gradient underflow.</li>
+    </ul>
+  </section>
+
+  <div class="page-nav">
+    <a href="../2.1_landscape_overview.html">&larr; 2.1 AI4S Landscape</a>
+    <a href="fno_neuraloperator.html">2.2.2 Fourier Neural Operator (FNO) &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

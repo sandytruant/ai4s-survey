@@ -1,0 +1,15 @@
+# Intermediate artifacts from research, downloads, and code execution
+.scratch/
+.cache/
+.downloads/
+.tmp/
+
+# Python / build artifacts
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# OS / Editor
+.DS_Store
+*.swp

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2.1 AI4S Landscape Overview — Electronic Structure | AI4S Survey</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script type="module" src="../../assets/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../../index.html">AI4S Survey</a>
+      <span>/</span>
+      <span>Pillar 1: Electronic Structure</span>
+      <span>/</span>
+      <span>2.1 AI4S Landscape Overview</span>
+    </nav>
+
+    <header class="hero">
+      <span class="badge badge-ai">AI4S Taxonomy &amp; Amdahl's Law</span>
+      <h1>2.1 AI4S Landscape for Electronic Structure</h1>
+      <p class="subtitle">Three distinct paradigms for injecting neural networks into quantum mechanics—and what non-AI classical kernels still remain in the end-to-end pipeline.</p>
+    </header>
+
+    <section class="section-card">
+      <h2>Three AI4S Paradigms: What AI Replaces vs. What Remains</h2>
+      <p>AI does not simply "replace quantum mechanics" with a black-box MLP. Instead, methods target specific bottlenecks in the electronic structure hierarchy, leaving exact mathematical or Monte Carlo kernels intact:</p>
+
+      <div class="diagram-box">
+        <svg viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Taxonomy of AI4S Methods in Electronic Structure: AI vs Non-AI Kernels">
+          <!-- Column 1: Neural Wavefunctions (VMC) -->
+          <rect x="15" y="15" width="275" height="295" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+          <text x="152" y="42" text-anchor="middle" font-weight="700" font-size="13.5" fill="#5b21b6">(a) Neural Wavefunctions (VMC)</text>
+          <text x="152" y="61" text-anchor="middle" font-size="11" fill="#6d28d9">Bypasses DFT; solves Schrödinger eq.</text>
+
+          <rect x="30" y="75" width="245" height="65" rx="6" fill="#ede9fe" stroke="#7c3aed"/>
+          <text x="152" y="95" text-anchor="middle" font-weight="700" font-size="11.5" fill="#4c1d95">AI Replaces:</text>
+          <text x="152" y="112" text-anchor="middle" font-size="11" fill="#3b0764">Hand-crafted Slater-Jastrow ansatz</text>
+          <text x="152" y="128" text-anchor="middle" font-size="11" fill="#3b0764">via FermiNet / Psiformer backflows</text>
+
+          <rect x="30" y="150" width="245" height="80" rx="6" fill="#f0fdfa" stroke="#0d9488"/>
+          <text x="152" y="170" text-anchor="middle" font-weight="700" font-size="11.5" fill="#115e59">Non-AI Remains:</text>
+          <text x="152" y="187" text-anchor="middle" font-size="11" fill="#134e4a">• Metropolis-Hastings MCMC sampling</text>
+          <text x="152" y="203" text-anchor="middle" font-size="11" fill="#134e4a">• Exact Laplacian ∇²ψ (kinetic energy)</text>
+          <text x="152" y="219" text-anchor="middle" font-size="11" fill="#134e4a">• Slater det + KFAC natural gradient</text>
+
+          <text x="152" y="254" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">Bottleneck: 2nd-order AD (∇²ψ) &amp; KFAC</text>
+          <text x="152" y="274" text-anchor="middle" font-size="11" fill="#475569">Accuracy: CCSD(T)+ (10–100 electrons)</text>
+          <text x="152" y="294" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2563eb">&rarr; FermiNet &amp; Psiformer</text>
+
+          <!-- Column 2: AI Hamiltonian Prediction -->
+          <rect x="312" y="15" width="275" height="295" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+          <text x="450" y="42" text-anchor="middle" font-weight="700" font-size="13.5" fill="#5b21b6">(b) AI Hamiltonian / Density</text>
+          <text x="450" y="61" text-anchor="middle" font-size="11" fill="#6d28d9">Replaces iterative SCF loop in DFT</text>
+
+          <rect x="327" y="75" width="245" height="65" rx="6" fill="#ede9fe" stroke="#7c3aed"/>
+          <text x="450" y="95" text-anchor="middle" font-weight="700" font-size="11.5" fill="#4c1d95">AI Replaces:</text>
+          <text x="450" y="112" text-anchor="middle" font-size="11" fill="#3b0764">10–50 SCF iterations &amp; 3D grid</text>
+          <text x="450" y="128" text-anchor="middle" font-size="11" fill="#3b0764">integrals via SE(3)/E(3)-equivariant GNN</text>
+
+          <rect x="327" y="150" width="245" height="80" rx="6" fill="#f0fdfa" stroke="#0d9488"/>
+          <text x="450" y="170" text-anchor="middle" font-weight="700" font-size="11.5" fill="#115e59">Non-AI Remains:</text>
+          <text x="450" y="187" text-anchor="middle" font-size="11" fill="#134e4a">• Overlap matrix S_μν integrals</text>
+          <text x="450" y="203" text-anchor="middle" font-size="11" fill="#134e4a">• 1-shot generalized eigensolve HC = SCE</text>
+          <text x="450" y="219" text-anchor="middle" font-size="11" fill="#134e4a">• Sparse/band post-processing</text>
+
+          <text x="450" y="254" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">Bottleneck: Clebsch-Gordan TP &amp; HC=SCE</text>
+          <text x="450" y="274" text-anchor="middle" font-size="11" fill="#475569">Scale: 10⁴+ atoms (DeepH-E3), molecules</text>
+          <text x="450" y="294" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2563eb">&rarr; DeepH-E3 &amp; QHNet</text>
+
+          <!-- Column 3: Neural XC Functionals -->
+          <rect x="610" y="15" width="275" height="295" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+          <text x="747" y="42" text-anchor="middle" font-weight="700" font-size="13.5" fill="#5b21b6">(c) Neural XC Functionals</text>
+          <text x="747" y="61" text-anchor="middle" font-size="11" fill="#6d28d9">Upgrades accuracy inside KS-DFT</text>
+
+          <rect x="625" y="75" width="245" height="65" rx="6" fill="#ede9fe" stroke="#7c3aed"/>
+          <text x="747" y="95" text-anchor="middle" font-weight="700" font-size="11.5" fill="#4c1d95">AI Replaces:</text>
+          <text x="747" y="112" text-anchor="middle" font-size="11" fill="#3b0764">Analytical E_XC[ρ] formula (PBE, B3LYP)</text>
+          <text x="747" y="128" text-anchor="middle" font-size="11" fill="#3b0764">with neural network on grid features</text>
+
+          <rect x="625" y="150" width="245" height="80" rx="6" fill="#f0fdfa" stroke="#0d9488"/>
+          <text x="747" y="170" text-anchor="middle" font-weight="700" font-size="11.5" fill="#115e59">Non-AI Remains:</text>
+          <text x="747" y="187" text-anchor="middle" font-size="11" fill="#134e4a">• Entire classical SCF loop</text>
+          <text x="747" y="203" text-anchor="middle" font-size="11" fill="#134e4a">• Quadrature grid integration &amp; ERI</text>
+          <text x="747" y="219" text-anchor="middle" font-size="11" fill="#134e4a">• O(N³) Fock matrix diagonalization</text>
+
+          <text x="747" y="254" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">Bottleneck: Grid MLP eval + SCF O(N³)</text>
+          <text x="747" y="274" text-anchor="middle" font-size="11" fill="#475569">Accuracy: Hybrid/CCSD(T) at meta-GGA cost</text>
+          <text x="747" y="294" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2563eb">&rarr; DM21 &amp; Skala</text>
+        </svg>
+        <div class="diagram-caption">Figure 2.1: Taxonomy of AI4S approaches for electronic structure, highlighting the exact boundary between learned neural components (purple) and remaining classical kernels (teal).</div>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>Representative Open-Source Methods (Deep Dives)</h2>
+      <p>Select a method below to inspect its step-by-step AI/non-AI workflow, hardware profiling data, compiler/kernel bottlenecks, and dedicated accelerators:</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Paradigm</th>
+            <th>Primary Hardware Bottleneck</th>
+            <th>Dedicated Accelerators / Kernels</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="2.2_representative_methods/ferminet_psiformer.html"><strong>FermiNet &amp; Psiformer</strong></a></td>
+            <td><span class="badge badge-ai">Neural VMC</span></td>
+            <td>Second-order autodiff Laplacian ($\nabla^2 \psi$), Slater determinants, KFAC Fisher inverse</td>
+            <td><code>folx</code> (Forward Laplacian), JAX/XLA on NVIDIA A100/V100 &amp; Google TPU</td>
+          </tr>
+          <tr>
+            <td><a href="2.2_representative_methods/deeph_e3.html"><strong>DeepH-E3</strong></a></td>
+            <td><span class="badge badge-ai">Equivariant H(R)</span></td>
+            <td>Clebsch-Gordan tensor products (<code>e3nn</code>) &amp; final sparse/dense diagonalization $HC=SCE$</td>
+            <td>NVIDIA cuEquivariance, OpenEquivariance, FlashTP, GPU eigensolvers</td>
+          </tr>
+          <tr>
+            <td><a href="2.2_representative_methods/qhnet.html"><strong>QHNet</strong></a></td>
+            <td><span class="badge badge-ai">Equivariant H(R)</span></td>
+            <td>Remaining tensor products &amp; Amdahl's limit from 1-shot $HC=SCE$ eigensolve</td>
+            <td>cuEquivariance, OpenEquivariance, FlashTP</td>
+          </tr>
+          <tr>
+            <td><a href="2.2_representative_methods/dm21_skala.html"><strong>DM21 &amp; Skala</strong></a></td>
+            <td><span class="badge badge-ai">Neural XC</span></td>
+            <td>Batched grid MLP inference + $\partial E_{\text{XC}}/\partial \rho$ autodiff inside classical SCF loop</td>
+            <td>GPU4PySCF, GauXC, LibTorch CUDA kernels</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="page-nav">
+      <a href="../1_scientific_problem/1.3_compute_demand_and_impact.html">&larr; 1.3 Compute Demand &amp; Impact</a>
+      <a href="2.2_representative_methods/ferminet_psiformer.html">2.2.1 FermiNet &amp; Psiformer &rarr;</a>
+    </div>
+  </div>
+</body>
+</html>

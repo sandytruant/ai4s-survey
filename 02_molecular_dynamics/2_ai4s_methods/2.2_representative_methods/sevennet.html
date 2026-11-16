@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SevenNet (+ FlashTP) — Representative AI4S Method | AI4S Survey</title>
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <script type="module" src="../../../assets/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 2: Molecular Dynamics</span> &rsaquo;
+    <a href="../2.1_landscape_overview.html">2.1 Landscape</a> &rsaquo;
+    <strong>SevenNet (+ FlashTP)</strong>
+  </nav>
+
+  <header class="hero">
+    <h1>SevenNet (+ FlashTP): Multi-GPU Spatial Decomposition &amp; Fused Tensor Products</h1>
+    <p class="subtitle">Scaling multi-layer equivariant GNNs across LAMMPS GPU clusters (&gt;80% weak scaling) and accelerating Clebsch-Gordan kernels 41.6&times; with FlashTP.</p>
+    <p style="margin-top:0.75rem;">
+      <span class="badge badge-ai">Equivariant GNN + Fused CG</span>
+      <span class="badge badge-hw">LAMMPS Multi-GPU / FlashTP</span>
+      &nbsp;|&nbsp;
+      <a href="https://github.com/MDIL-SNU/SevenNet" target="_blank">GitHub: MDIL-SNU/SevenNet</a>
+      &nbsp;|&nbsp;
+      <a href="https://github.com/SNU-ARC/flashTP" target="_blank">GitHub: SNU-ARC/flashTP</a>
+      &nbsp;|&nbsp;
+      <a href="https://pubs.acs.org/doi/10.1021/acs.jctc.4c00190" target="_blank">JCTC 2024 Paper</a>
+      &nbsp;|&nbsp;
+      <a href="https://arxiv.org/abs/2502.05638" target="_blank">FlashTP (ICML)</a>
+    </p>
+  </header>
+
+  <div class="section-card">
+    <h2>2.2.1 Overall Workflow: Layer-by-Layer Halo Exchange in LAMMPS</h2>
+    <p>
+      Unlike Allegro (which drops message passing), <strong>SevenNet</strong> retains NequIP's multi-layer equivariant message passing for high accuracy while solving the multi-GPU scaling problem in LAMMPS. Instead of fetching an $L \cdot r_c$ ghost halo all at once, SevenNet performs <strong>per-layer MPI halo communication</strong> of node features across a single-$r_c$ boundary between message-passing layers.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 215" width="820" height="215" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+        <!-- Non-AI 1 -->
+        <rect x="15" y="30" width="145" height="95" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="87" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">Non-AI: Spatial Box</text>
+        <text x="87" y="74" text-anchor="middle" font-size="10.5" fill="#475569">1× r_c Ghost Halo</text>
+        <text x="87" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Local Edge Graph</text>
+        <text x="87" y="106" text-anchor="middle" font-size="10.5" fill="#0d9488">Per-GPU Subdomain</text>
+
+        <line x1="160" y1="77" x2="185" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI 1 -->
+        <rect x="190" y="30" width="180" height="95" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="280" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: FlashTP Layer l</text>
+        <text x="280" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Fused CG Tensor Prod.</text>
+        <text x="280" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Sparsity-Aware Conv.</text>
+        <text x="280" y="106" text-anchor="middle" font-size="10.5" fill="#7c3aed">Shared-Mem / Register Opt.</text>
+
+        <line x1="370" y1="77" x2="395" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Non-AI Sync -->
+        <rect x="400" y="30" width="145" height="95" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="472" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">Non-AI: MPI Comm</text>
+        <text x="472" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Forward: Halo Features</text>
+        <text x="472" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Backward: Halo Grads</text>
+        <text x="472" y="106" text-anchor="middle" font-size="10.5" fill="#0d9488">Repeat for l = 1..L</text>
+
+        <line x1="545" y1="77" x2="570" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI 2 -->
+        <rect x="575" y="30" width="115" height="95" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="632" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Readout</text>
+        <text x="632" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Sum → E_i</text>
+        <text x="632" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Autograd ∂E/∂r_i</text>
+        <text x="632" y="106" text-anchor="middle" font-size="10.5" fill="#7c3aed">Virial Stress</text>
+
+        <line x1="690" y1="77" x2="710" y2="77" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Non-AI 2 -->
+        <rect x="715" y="30" width="90" height="95" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="760" y="54" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f766e">Non-AI</text>
+        <text x="760" y="74" text-anchor="middle" font-size="10.5" fill="#475569">Verlet Step</text>
+        <text x="760" y="90" text-anchor="middle" font-size="10.5" fill="#475569">Thermostat</text>
+        <text x="760" y="106" text-anchor="middle" font-size="10.5" fill="#0d9488">PBC Wrap</text>
+
+        <rect x="15" y="148" width="790" height="45" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+        <text x="410" y="175" text-anchor="middle" font-size="11.5" fill="#1e40af">
+          <strong>Trade-off:</strong> Avoids O((L·r_c)³) memory explosion per GPU in exchange for L lightweight MPI point-to-point exchanges per step.
+        </text>
+      </svg>
+      <div class="diagram-caption">Figure 1: SevenNet spatial-decomposition pipeline with per-layer MPI halo exchange and FlashTP fused kernels.</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>2.2.2 Computational Profiling &amp; Bottlenecks</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Component / Benchmark</th>
+          <th>Published Performance</th>
+          <th>Architectural Bottleneck &amp; Compiler Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Multi-GPU LAMMPS Scaling</strong><br>(32-GPU cluster, $\text{SiO}_2$)</td>
+          <td><strong>&gt;80% weak-scaling parallel efficiency</strong>; near-ideal strong scaling when GPUs are saturated</td>
+          <td>Avoids redundant computation on overlapping $L\cdot r_c$ halos; communication scales with surface area of subdomain.</td>
+        </tr>
+        <tr>
+          <td><strong>Clebsch-Gordan (CG) Tensor Product</strong><br>(<code>FlashTP</code> vs. <code>e3nn</code> / <code>cuEquivariance</code>)</td>
+          <td>Kernel-level: up to <strong>41.6&times;</strong> faster than <code>e3nn</code> and <strong>60.8&times;</strong> faster than <code>cuEquivariance</code></td>
+          <td>CG tensor products consume <strong>75%–90%</strong> of runtime &amp; memory in equivariant MLIPs due to sparse structure &amp; intermediate edge tensors.</td>
+        </tr>
+        <tr>
+          <td><strong>End-to-End Model</strong><br>(<code>SevenNet-l3i5</code> + <code>FlashTP</code>)</td>
+          <td><strong>4.2&times;</strong> inference speedup; <strong>3.5&times;</strong> training speedup; <strong>&gt;6&times;</strong> peak memory reduction</td>
+          <td>Compile-time path aggregation, sparsity-aware CG skipping, and kernel fusion keep intermediates in GPU registers/shared memory.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-card">
+    <h2>2.2.3 Dedicated Accelerators &amp; Kernel Libraries</h2>
+    <ul>
+      <li><strong><code>FlashTP</code> (<a href="https://github.com/SNU-ARC/flashTP" target="_blank">SNU-ARC/flashTP</a>):</strong> Open-source C++/CUDA library implementing fused, sparsity-aware, path-aggregated Clebsch-Gordan tensor products for SevenNet, MACE, and NequIP.</li>
+      <li><strong><code>cuEquivariance</code> &amp; LAMMPS-MPI-CUDA:</strong> Native multi-GPU spatial decomposition in LAMMPS with CUDA-aware MPI for direct GPU-to-GPU halo transfers.</li>
+    </ul>
+  </div>
+
+  <div class="page-nav">
+    <a href="mace.html">&larr; 2.2.3 MACE</a>
+    <a href="../../../index.html">AI4S Survey Home &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

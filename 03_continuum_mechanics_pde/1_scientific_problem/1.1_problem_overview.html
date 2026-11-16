@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.1 Problem Overview — Macroscopic Continuum Mechanics PDEs</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script type="module" src="../../assets/app.js"></script>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 3: Continuum Mechanics PDEs</span> &rsaquo;
+    <span>1.1 Problem Overview</span>
+  </nav>
+
+  <header class="hero">
+    <h1>1.1 Macroscopic Continuum Mechanics PDEs</h1>
+    <p class="subtitle">Translating continuous physical fields—fluids, solids, heat, and electromagnetics—into discrete grids, graphs, and tensor workloads.</p>
+  </header>
+
+  <section class="section-card">
+    <h2>What Is Continuum Mechanics?</h2>
+    <p>
+      Instead of tracking $10^{23}$ individual atoms (Pillar 2), <strong>continuum mechanics</strong> models matter as a smooth, continuous medium. Every point $\mathbf{x} \in \Omega \subset \mathbb{R}^3$ at time $t$ carries macroscopic field values—velocity $\mathbf{u}(\mathbf{x}, t)$, pressure $p(\mathbf{x}, t)$, stress $\boldsymbol{\sigma}(\mathbf{x}, t)$, temperature $T(\mathbf{x}, t)$, or electromagnetic fields $(\mathbf{E}, \mathbf{B})$.
+    </p>
+    <p>
+      Their evolution is governed by <strong>Partial Differential Equations (PDEs)</strong> expressing local conservation laws (mass, momentum, energy, charge): what flows into a tiny control volume minus what flows out equals the rate of accumulation plus internal sources.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 260" width="820" height="260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Continuum field discretization onto meshes and grids">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+          <linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#dbeafe"/>
+            <stop offset="50%" stop-color="#93c5fd"/>
+            <stop offset="100%" stop-color="#3b82f6"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Panel 1: Continuous Physics -->
+        <rect x="15" y="20" width="230" height="215" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text x="130" y="45" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1. Continuous Domain Ω</text>
+        <rect x="35" y="65" width="190" height="115" rx="6" fill="url(#flowGrad)" opacity="0.45" stroke="#93c5fd"/>
+        <!-- Airfoil shape -->
+        <path d="M 75 125 Q 115 98 180 122 Q 120 135 75 125 Z" fill="#334155"/>
+        <!-- Streamlines -->
+        <path d="M 42 95 Q 115 80 218 98" fill="none" stroke="#1d4ed8" stroke-width="1.8"/>
+        <path d="M 42 122 Q 62 122 75 125" fill="none" stroke="#1d4ed8" stroke-width="1.8"/>
+        <path d="M 180 122 Q 200 123 218 124" fill="none" stroke="#1d4ed8" stroke-width="1.8"/>
+        <path d="M 42 152 Q 120 160 218 148" fill="none" stroke="#1d4ed8" stroke-width="1.8"/>
+        <text x="130" y="202" text-anchor="middle" font-size="11" fill="#475569">Infinite-dim fields u(x,t), p(x,t)</text>
+        <text x="130" y="218" text-anchor="middle" font-size="11" fill="#475569">Airflow over an airfoil</text>
+
+        <line x1="252" y1="128" x2="288" y2="128" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Panel 2: Structured Grid -->
+        <rect x="295" y="20" width="230" height="215" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text x="410" y="45" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">2a. Structured Grid (FDM/FFT)</text>
+        <g stroke="#94a3b8" stroke-width="1">
+          <rect x="330" y="65" width="160" height="115" fill="#f8fafc"/>
+          <line x1="362" y1="65" x2="362" y2="180"/><line x1="394" y1="65" x2="394" y2="180"/>
+          <line x1="426" y1="65" x2="426" y2="180"/><line x1="458" y1="65" x2="458" y2="180"/>
+          <line x1="330" y1="88" x2="490" y2="88"/><line x1="330" y1="111" x2="490" y2="111"/>
+          <line x1="330" y1="134" x2="490" y2="134"/><line x1="330" y1="157" x2="490" y2="157"/>
+        </g>
+        <!-- Stencil highlight -->
+        <rect x="394" y="111" width="32" height="23" fill="#2563eb" opacity="0.35" stroke="#2563eb" stroke-width="1.5"/>
+        <rect x="362" y="111" width="32" height="23" fill="#93c5fd" opacity="0.35"/>
+        <rect x="426" y="111" width="32" height="23" fill="#93c5fd" opacity="0.35"/>
+        <rect x="394" y="88" width="32" height="23" fill="#93c5fd" opacity="0.35"/>
+        <rect x="394" y="134" width="32" height="23" fill="#93c5fd" opacity="0.35"/>
+        <text x="410" y="202" text-anchor="middle" font-size="11" fill="#0f172a" font-weight="600">Dense 3D Tensor [Nx, Ny, Nz, C]</text>
+        <text x="410" y="218" text-anchor="middle" font-size="11" fill="#475569">Regular stride-k stencil / FFT</text>
+
+        <!-- Panel 3: Unstructured Mesh -->
+        <rect x="565" y="20" width="240" height="215" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text x="685" y="45" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">2b. Unstructured Mesh (FVM/FEM)</text>
+        <g stroke="#64748b" stroke-width="1.1" fill="#f8fafc">
+          <polygon points="590,70 645,68 620,108"/>
+          <polygon points="645,68 705,72 670,105"/>
+          <polygon points="705,72 775,70 740,108"/>
+          <polygon points="645,68 670,105 620,108"/>
+          <polygon points="705,72 740,108 670,105"/>
+          <polygon points="590,70 620,108 590,145"/>
+          <polygon points="620,108 670,105 645,145"/>
+          <polygon points="670,105 740,108 715,142"/>
+          <polygon points="740,108 775,70 778,138"/>
+          <polygon points="740,108 778,138 715,142"/>
+          <polygon points="590,145 620,108 645,145"/>
+          <polygon points="645,145 670,105 715,142"/>
+          <polygon points="590,145 645,145 625,178"/>
+          <polygon points="645,145 715,142 685,178"/>
+          <polygon points="715,142 778,138 755,178"/>
+          <polygon points="645,145 685,178 625,178"/>
+          <polygon points="715,142 755,178 685,178"/>
+        </g>
+        <!-- Highlighted airfoil cutout -->
+        <path d="M 638 125 Q 675 110 725 123 Q 678 134 638 125 Z" fill="#0d9488"/>
+        <text x="685" y="202" text-anchor="middle" font-size="11" fill="#0f172a" font-weight="600">Sparse Graph / CSR Matrix</text>
+        <text x="685" y="218" text-anchor="middle" font-size="11" fill="#475569">Adaptive refinement near boundary</text>
+      </svg>
+      <p class="diagram-caption">
+        <strong>Figure 1:</strong> Mapping continuous PDE fields onto hardware data structures. Structured grids yield dense tensors with regular memory access; unstructured meshes yield sparse graphs/CSR matrices with indirect gather-scatter indexing.
+      </p>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <h2>Core Governing Equations</h2>
+    <p>
+      From a computer architect's viewpoint, most continuum simulations solve one of four canonical PDE families, each imposing distinct coupling, stiffness, and precision demands:
+    </p>
+
+    <div class="grid-2">
+      <div>
+        <h3>1. Fluid Dynamics: Navier-Stokes</h3>
+        <div class="equation-box">
+          $$\frac{\partial \mathbf{u}}{\partial t} + (\mathbf{u} \cdot \nabla)\mathbf{u} = -\frac{1}{\rho}\nabla p + \nu \nabla^2 \mathbf{u} + \mathbf{f}, \quad \nabla \cdot \mathbf{u} = 0$$
+        </div>
+        <p>
+          Governs incompressible fluids ($\rho$ density, $\nu$ kinematic viscosity). Nonlinear advection $(\mathbf{u}\cdot\nabla)\mathbf{u}$ creates multi-scale turbulence, while the divergence-free constraint $\nabla\cdot\mathbf{u}=0$ forces a <strong>global elliptic Poisson solve</strong> for pressure $p$ at every time step.
+        </p>
+      </div>
+
+      <div>
+        <h3>2. Solid Mechanics: Elasticity</h3>
+        <div class="equation-box">
+          $$\rho \frac{\partial^2 \mathbf{d}}{\partial t^2} = \nabla \cdot \boldsymbol{\sigma}(\mathbf{d}) + \mathbf{f}, \quad \boldsymbol{\sigma} = \mathbf{C} : \boldsymbol{\varepsilon}(\mathbf{d})$$
+        </div>
+        <p>
+          Governs structural displacement $\mathbf{d}$ and stress tensor $\boldsymbol{\sigma}$ (linear Hooke's law or nonlinear hyperelasticity/plasticity). Typically discretized via <strong>Finite Elements (FEM)</strong>, yielding large symmetric positive-definite (or ill-conditioned) sparse linear systems $K\mathbf{d}=\mathbf{f}$.
+        </p>
+      </div>
+
+      <div>
+        <h3>3. Thermal Transport: Heat / Diffusion</h3>
+        <div class="equation-box">
+          $$\rho c_p \frac{\partial T}{\partial t} = \nabla \cdot (k \nabla T) + q_{\text{src}}$$
+        </div>
+        <p>
+          Parabolic PDE governing temperature $T$ with thermal conductivity $k$ and heat source $q_{\text{src}}$ (e.g., power density in a 3D-IC). Explicit stepping is severely constrained by $\Delta t \propto \Delta x^2$, making implicit linear solves standard.
+        </p>
+      </div>
+
+      <div>
+        <h3>4. Electromagnetics: Maxwell's Equations</h3>
+        <div class="equation-box">
+          $$\frac{\partial \mathbf{E}}{\partial t} = \frac{1}{\varepsilon}\nabla \times \mathbf{H} - \frac{1}{\varepsilon}\mathbf{J}, \quad \frac{\partial \mathbf{H}}{\partial t} = -\frac{1}{\mu}\nabla \times \mathbf{E}$$
+        </div>
+        <p>
+          Hyperbolic wave propagation of electric ($\mathbf{E}$) and magnetic ($\mathbf{H}$) fields. Often solved via staggered Yee-grid Finite-Difference Time-Domain (FDTD) stencils—highly regular, memory-bandwidth bound, and sensitive to phase dispersion.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <h2>Intuitive Examples &amp; Real-World Use Cases</h2>
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 190" width="820" height="190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Navier-Stokes momentum and pressure projection intuition">
+        <rect x="15" y="15" width="180" height="155" rx="8" fill="#eff6ff" stroke="#93c5fd"/>
+        <text x="105" y="42" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e3a8a">Advection (u · ∇)u</text>
+        <text x="105" y="65" text-anchor="middle" font-size="11" fill="#334155">Fluid carries its own</text>
+        <text x="105" y="81" text-anchor="middle" font-size="11" fill="#334155">momentum forward</text>
+        <text x="105" y="110" text-anchor="middle" font-size="11" font-weight="600" fill="#1d4ed8">HW Pattern:</text>
+        <text x="105" y="128" text-anchor="middle" font-size="10.5" fill="#475569">Local stencil / flux</text>
+        <text x="105" y="144" text-anchor="middle" font-size="10.5" fill="#475569">High parallelism</text>
+
+        <text x="208" y="96" text-anchor="middle" font-size="18" font-weight="700" fill="#475569">+</text>
+
+        <rect x="220" y="15" width="180" height="155" rx="8" fill="#f0fdfa" stroke="#5eead4"/>
+        <text x="310" y="42" text-anchor="middle" font-size="12.5" font-weight="700" fill="#115e59">Diffusion ν∇²u</text>
+        <text x="310" y="65" text-anchor="middle" font-size="11" fill="#334155">Viscosity smooths</text>
+        <text x="310" y="81" text-anchor="middle" font-size="11" fill="#334155">velocity gradients</text>
+        <text x="310" y="110" text-anchor="middle" font-size="11" font-weight="600" fill="#0d9488">HW Pattern:</text>
+        <text x="310" y="128" text-anchor="middle" font-size="10.5" fill="#475569">7-pt / 27-pt Laplacian</text>
+        <text x="310" y="144" text-anchor="middle" font-size="10.5" fill="#475569">Memory-BW bound</text>
+
+        <text x="413" y="96" text-anchor="middle" font-size="18" font-weight="700" fill="#475569">&rarr;</text>
+
+        <rect x="425" y="15" width="185" height="155" rx="8" fill="#fffbeb" stroke="#fcd34d"/>
+        <text x="517" y="42" text-anchor="middle" font-size="12.5" font-weight="700" fill="#92400e">Pressure Projection</text>
+        <text x="517" y="65" text-anchor="middle" font-size="11" fill="#334155">Enforce ∇ · u = 0</text>
+        <text x="517" y="81" text-anchor="middle" font-size="11" fill="#334155">(∇²p = ∇ · u* / Δt)</text>
+        <text x="517" y="110" text-anchor="middle" font-size="11" font-weight="600" fill="#d97706">HW Pattern:</text>
+        <text x="517" y="128" text-anchor="middle" font-size="10.5" fill="#475569">Global Poisson solve</text>
+        <text x="517" y="144" text-anchor="middle" font-size="10.5" fill="#475569">All-reduce / Multigrid</text>
+
+        <text x="623" y="96" text-anchor="middle" font-size="18" font-weight="700" fill="#475569">&rarr;</text>
+
+        <rect x="635" y="15" width="170" height="155" rx="8" fill="#f5f3ff" stroke="#c4b5fd"/>
+        <text x="720" y="42" text-anchor="middle" font-size="12.5" font-weight="700" fill="#5b21b6">AI4S Opportunity</text>
+        <text x="720" y="65" text-anchor="middle" font-size="11" fill="#334155">Replace iterative</text>
+        <text x="720" y="81" text-anchor="middle" font-size="11" fill="#334155">time-step &amp; Poisson</text>
+        <text x="720" y="110" text-anchor="middle" font-size="11" font-weight="600" fill="#7c3aed">HW Shift:</text>
+        <text x="720" y="128" text-anchor="middle" font-size="10.5" fill="#475569">Sparse SpMV &rarr; Dense</text>
+        <text x="720" y="144" text-anchor="middle" font-size="10.5" fill="#475569">GEMM / FFT / Attn</text>
+      </svg>
+      <p class="diagram-caption">
+        <strong>Figure 2:</strong> Decomposition of a Navier-Stokes time step into computational primitives. The global pressure Poisson solve is the primary synchronization bottleneck that AI surrogates aim to bypass.
+      </p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Domain</th>
+          <th>Physical Phenomenon</th>
+          <th>Governing PDEs</th>
+          <th>Typical Data Structure &amp; Scale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Aerospace &amp; Automotive CFD</strong></td>
+          <td>Lift, drag, wake turbulence over wings &amp; car bodies</td>
+          <td>Compressible / Incompressible Navier-Stokes + RANS/LES</td>
+          <td>$10^7$–$10^9$ unstructured polyhedral/hex cells</td>
+        </tr>
+        <tr>
+          <td><strong>Chip Thermal &amp; EM Signoff</strong></td>
+          <td>3D-IC hotspot dissipation, interconnect signal integrity</td>
+          <td>Heat Equation + Maxwell's Equations</td>
+          <td>Multi-layer Cartesian grids ($10^6$–$10^8$ voxels)</td>
+        </tr>
+        <tr>
+          <td><strong>Structural Engineering</strong></td>
+          <td>Bridge/turbine blade stress, crash &amp; metal forming</td>
+          <td>Linear / Nonlinear Elastodynamics + Contact</td>
+          <td>Unstructured tetrahedral/hexahedral FEM meshes</td>
+        </tr>
+        <tr>
+          <td><strong>Weather &amp; Climate Modeling</strong></td>
+          <td>Global atmospheric circulation, hurricane tracks</td>
+          <td>Primitive Equations / Shallow Water on sphere</td>
+          <td>Cubed-sphere / icosahedral grids ($0.1^\circ$–$1^\circ$)</td>
+        </tr>
+        <tr>
+          <td><strong>Fusion Plasma (MHD)</strong></td>
+          <td>Tokamak magnetic confinement &amp; edge-localized modes</td>
+          <td>Magnetohydrodynamics (Navier-Stokes + Maxwell)</td>
+          <td>Flux-aligned toroidal meshes, stiff multi-scale waves</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="page-nav">
+    <a href="../../index.html">&larr; Survey Home</a>
+    <a href="1.2_classical_methods_and_bottlenecks.html">1.2 Classical Methods &amp; Bottlenecks &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

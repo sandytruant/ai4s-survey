@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2.2.1 AI4S Landscape Overview — Molecular Dynamics | AI4S Survey</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script type="module" src="../../assets/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 2: Molecular Dynamics</span> &rsaquo;
+    <strong>2.1 AI4S Landscape Overview</strong>
+  </nav>
+
+  <header class="hero">
+    <h1>2.1 AI4S Landscape Overview: Machine Learning Interatomic Potentials</h1>
+    <p class="subtitle">Replacing $O(N^3)$ quantum DFT force evaluations with $O(N)$ neural networks—and understanding the non-AI kernels that remain in the MD loop.</p>
+  </header>
+
+  <div class="section-card">
+    <h2>What AI Replaces vs. What Non-AI Computation Remains</h2>
+    <p>
+      In mainstream AI-accelerated MD, neural networks—called <strong>Machine Learning Interatomic Potentials (MLIPs)</strong> or <strong>Machine Learning Force Fields (MLFFs)</strong>—act as surrogate models trained on DFT energies and forces. They decompose total energy into per-atom contributions $E(\mathbf{R}) = \sum_{i=1}^N E_i(\mathcal{N}(i))$ and compute forces via reverse-mode automatic differentiation $\mathbf{F}_i = -\nabla_{\mathbf{r}_i} E$.
+    </p>
+    <p>
+      From an Amdahl's Law perspective, <strong>AI does not replace the MD engine</strong> (such as LAMMPS or ASE); it replaces only the potential energy and force kernel inside each Velocity Verlet timestep.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 265" width="820" height="265" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+        <!-- Legend -->
+        <rect x="20" y="10" width="14" height="14" rx="3" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="40" y="22" font-size="11.5" font-weight="600" fill="#5b21b6">AI Surrogate Kernels (MLIP)</text>
+        <rect x="235" y="10" width="14" height="14" rx="3" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="255" y="22" font-size="11.5" font-weight="600" fill="#0f766e">Non-AI Classical MD Infrastructure</text>
+
+        <!-- Step 1: Non-AI -->
+        <rect x="20" y="45" width="165" height="90" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="102" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">1. Spatial &amp; Graph Prep</text>
+        <text x="102" y="87" text-anchor="middle" font-size="10.5" fill="#475569">MPI Domain Decomp.</text>
+        <text x="102" y="103" text-anchor="middle" font-size="10.5" fill="#475569">Ghost Halo Exchange</text>
+        <text x="102" y="119" text-anchor="middle" font-size="10.5" fill="#0d9488">Verlet Neighbor List</text>
+
+        <line x1="185" y1="90" x2="215" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Step 2: AI -->
+        <rect x="220" y="45" width="215" height="90" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="327" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#4c1d95">2. MLIP Forward Pass</text>
+        <text x="327" y="87" text-anchor="middle" font-size="10.5" fill="#475569">Radial/Spherical Embeddings</text>
+        <text x="327" y="103" text-anchor="middle" font-size="10.5" fill="#475569">Message Passing / Tensor Prod.</text>
+        <text x="327" y="119" text-anchor="middle" font-size="10.5" fill="#7c3aed">Per-Atom Energy E_i → Σ E_i</text>
+
+        <line x1="435" y1="90" x2="465" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Step 3: AI -->
+        <rect x="470" y="45" width="160" height="90" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="550" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#4c1d95">3. Autograd Forces</text>
+        <text x="550" y="87" text-anchor="middle" font-size="10.5" fill="#475569">Reverse-Mode ∂E/∂r_i</text>
+        <text x="550" y="103" text-anchor="middle" font-size="10.5" fill="#475569">Virial Stress Tensor</text>
+        <text x="550" y="119" text-anchor="middle" font-size="10.5" fill="#7c3aed">2–3× Forward Cost</text>
+
+        <line x1="630" y1="90" x2="660" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Step 4: Non-AI -->
+        <rect x="665" y="45" width="140" height="90" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="735" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">4. Integration</text>
+        <text x="735" y="87" text-anchor="middle" font-size="10.5" fill="#475569">Long-Range / D3</text>
+        <text x="735" y="103" text-anchor="middle" font-size="10.5" fill="#475569">Velocity Verlet</text>
+        <text x="735" y="119" text-anchor="middle" font-size="10.5" fill="#0d9488">Thermostat / PBC</text>
+
+        <!-- Loop -->
+        <path d="M 735 135 L 735 185 L 102 185 L 102 139" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+        <rect x="220" y="168" width="380" height="32" rx="16" fill="#ffffff" stroke="#cbd5e1"/>
+        <text x="410" y="189" text-anchor="middle" font-size="11.5" font-weight="600" fill="#0f172a">MLIPs bridge AIMD accuracy to O(N) scaling—yet cost 10²–10⁴× more than LJ!</text>
+
+        <!-- Secondary paradigm note -->
+        <rect x="20" y="215" width="785" height="38" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+        <text x="412" y="239" text-anchor="middle" font-size="11.5" fill="#1e40af">
+          <strong>Emerging Frontier:</strong> Coarse-Grained MLIPs &amp; Generative Boltzmann Emulators / Flow Matching (e.g., BioEmu, Timewarp) bypass 1 fs steps entirely.
+        </text>
+      </svg>
+      <div class="diagram-caption">Figure 1: Boundary between AI surrogate evaluation (purple) and non-AI classical MD infrastructure (teal) inside each simulation step.</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>Taxonomy of MLIP Architectures (Hardware &amp; Compiler View)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Family</th>
+          <th>Representative Methods</th>
+          <th>Core Compute Primitives</th>
+          <th>Primary Hardware Bottleneck</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Invariant Descriptor + MLP</strong></td>
+          <td><a href="2.2_representative_methods/deepmd_kit.html">DeePMD-kit</a>, Behler-Parrinello</td>
+          <td>Dense small-matrix GEMMs (<code>MLP</code>), radial/angular embeddings, custom fused CUDA/SVE kernels</td>
+          <td>Embedding memory bandwidth &amp; ghost-atom halo communication at $10^4+$ GPUs/nodes.</td>
+        </tr>
+        <tr>
+          <td><strong>Strictly Local Equivariant</strong></td>
+          <td><a href="2.2_representative_methods/nequip_allegro.html">Allegro</a> (vs. NequIP)</td>
+          <td>Per-edge tensor products over spherical harmonics $Y_\ell^m$ without multi-hop message passing</td>
+          <td>Clebsch-Gordan tensor product register pressure &amp; edge-level memory footprint.</td>
+        </tr>
+        <tr>
+          <td><strong>Higher-Body-Order Equivariant MPNN</strong></td>
+          <td><a href="2.2_representative_methods/mace.html">MACE</a></td>
+          <td>ACE many-body symmetric contractions + 2-layer $E(3)$-equivariant message passing</td>
+          <td>Sparse scatter-gather &amp; unoptimized <code>e3nn</code> kernel launch overhead (mitigated by <code>cuEquivariance</code>).</td>
+        </tr>
+        <tr>
+          <td><strong>Scalable Multi-GPU Equivariant GNNs &amp; uMLIPs</strong></td>
+          <td><a href="2.2_representative_methods/sevennet.html">SevenNet</a>, <a href="https://github.com/facebookresearch/fairchem" target="_blank">FAIRChem UMA</a></td>
+          <td>Multi-layer equivariant GNNs with spatial halo-passing or Mixture-of-Linear-Experts (MoLE)</td>
+          <td>Multi-hop receptive field ($L \cdot r_c$) inflating MPI ghost halos; CG tensor products (75–90% runtime, solved by <code>FlashTP</code>).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-card">
+    <h2>Representative Methods (Deep-Dive Pages)</h2>
+    <div class="grid-2">
+      <div class="callout ai">
+        <h3><a href="2.2_representative_methods/deepmd_kit.html">DeePMD-kit</a></h3>
+        <p>Descriptor-based deep potential achieving 100M+ atoms on Summit and 149 ns/day on Fugaku via custom fused kernels and mixed precision.</p>
+      </div>
+      <div class="callout ai">
+        <h3><a href="2.2_representative_methods/nequip_allegro.html">NequIP &amp; Allegro</a></h3>
+        <p>$E(3)$-equivariant GNNs vs. strictly local tensor-product architectures that eliminate multi-hop halo blowup to scale to 100M atoms on A100 clusters.</p>
+      </div>
+      <div class="callout ai">
+        <h3><a href="2.2_representative_methods/mace.html">MACE</a></h3>
+        <p>Many-body equivariant MPNNs combining Atomic Cluster Expansion with <code>cuEquivariance</code> CUDA primitives for 3–5&times; inference speedups.</p>
+      </div>
+      <div class="callout ai">
+        <h3><a href="2.2_representative_methods/sevennet.html">SevenNet (+ FlashTP)</a></h3>
+        <p>Multi-GPU spatial-decomposition equivariant GNN in LAMMPS (&gt;80% weak scaling) paired with sparsity-aware fused <code>FlashTP</code> kernels.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-nav">
+    <a href="../1_scientific_problem/1.3_compute_demand_and_impact.html">&larr; 1.3 Compute Demand &amp; Impact</a>
+    <a href="2.2_representative_methods/deepmd_kit.html">2.2.1 DeePMD-kit &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

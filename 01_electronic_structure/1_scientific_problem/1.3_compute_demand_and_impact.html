@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.3 Compute Demand &amp; Impact — Electronic Structure | AI4S Survey</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script type="module" src="../../assets/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="../../index.html">AI4S Survey</a>
+      <span>/</span>
+      <span>Pillar 1: Electronic Structure</span>
+      <span>/</span>
+      <span>1.3 Compute Demand &amp; Impact</span>
+    </nav>
+
+    <header class="hero">
+      <span class="badge badge-warn">HPC Workload Reality &amp; Scientific Compromises</span>
+      <h1>1.3 Compute Demand &amp; Scientific Impact</h1>
+      <p class="subtitle">Why electronic structure codes consume a massive fraction of global supercomputer cycles—and what physics is lost when compute is insufficient.</p>
+    </header>
+
+    <section class="section-card">
+      <h2>Supercomputer Cycle Consumption</h2>
+      <p>Electronic structure simulations are among the single largest consumers of leadership-class HPC allocations worldwide. Unlike AI training workloads that saturate Tensor Cores in BF16/FP8, classical DFT codes demand <strong>FP64 throughput, high memory bandwidth, and low-latency interconnects</strong>.</p>
+
+      <div class="grid-3">
+        <div class="callout">
+          <strong>NERSC (DOE Flagship)</strong><br>
+          Materials science and chemistry account for ~20–30%+ of total node-hours. Historically, the plane-wave DFT code <strong>VASP alone has consumed ~20%</strong> of NERSC's entire supercomputer workload, alongside Quantum ESPRESSO, NWChem, and CP2K.
+        </div>
+        <div class="callout nonai">
+          <strong>Fugaku (RIKEN, A64FX)</strong><br>
+          Plane-wave DFT codes (Quantum ESPRESSO, VASP) and real-space DFT codes (RSDFT) form a core tier of Fugaku's materials discovery and industrial allocations, heavily exercising its 1 TB/s HBM2 bandwidth per node.
+        </div>
+        <div class="callout warn">
+          <strong>Frontier (ORNL Exascale)</strong><br>
+          GPU-ported electronic structure codes (VASP/OpenACC, Quantum ESPRESSO GPU, LSMS) run large-scale INCITE/ALCC materials campaigns, yet 3D FFT all-to-all communication and $O(N^3)$ eigensolvers limit strong scaling across thousands of GPUs.
+        </div>
+      </div>
+
+      <div class="diagram-box">
+        <svg viewBox="0 0 860 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Scaling Wall: System Size vs Compute Time for Classical DFT and Compromises">
+          <!-- Axes -->
+          <line x1="80" y1="210" x2="430" y2="210" stroke="#334155" stroke-width="2"/>
+          <line x1="80" y1="210" x2="80" y2="30" stroke="#334155" stroke-width="2"/>
+          <text x="255" y="240" text-anchor="middle" font-size="12" font-weight="600" fill="#334155">System Size N (Atoms)</text>
+          <text x="35" y="120" text-anchor="middle" font-size="12" font-weight="600" fill="#334155" transform="rotate(-90 35 120)">Compute Cost (Log)</text>
+
+          <!-- Tick labels -->
+          <text x="110" y="226" font-size="10.5" fill="#475569">10¹</text>
+          <text x="200" y="226" font-size="10.5" fill="#475569">10²</text>
+          <text x="295" y="226" font-size="10.5" fill="#475569">10³</text>
+          <text x="390" y="226" font-size="10.5" fill="#475569">10⁴</text>
+
+          <!-- Shaded intractable zone -->
+          <rect x="275" y="30" width="155" height="180" fill="#fef2f2" opacity="0.7"/>
+          <text x="352" y="50" text-anchor="middle" font-size="11" font-weight="700" fill="#dc2626">Intractable for AIMD</text>
+
+          <!-- Curves -->
+          <path d="M 95 195 Q 150 165 200 110 T 270 35" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+          <text x="228" y="45" font-size="10.5" font-weight="600" fill="#dc2626">CCSD(T) O(N⁷)</text>
+
+          <path d="M 95 200 Q 190 190 280 140 T 405 40" fill="none" stroke="#0d9488" stroke-width="2.5"/>
+          <text x="345" y="95" font-size="10.5" font-weight="600" fill="#0d9488">KS-DFT O(N³)</text>
+
+          <path d="M 95 205 L 415 160" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-dasharray="6,3"/>
+          <text x="340" y="155" font-size="10.5" font-weight="600" fill="#7c3aed">AI Surrogate O(N)</text>
+
+          <!-- Right Panel: What breaks when compute is insufficient -->
+          <rect x="465" y="25" width="375" height="205" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="2"/>
+          <text x="652" y="50" text-anchor="middle" font-weight="700" font-size="13.5" fill="#92400e">What Happens When Performance Is Insufficient?</text>
+          <text x="482" y="80" font-size="12" font-weight="600" fill="#0f172a">1. Artificially Small Unit Cells (10–100 atoms)</text>
+          <text x="495" y="98" font-size="11" fill="#475569">Misses grain boundaries, dilute defects, Moiré superlattices.</text>
+          <text x="482" y="126" font-size="12" font-weight="600" fill="#0f172a">2. Short Ab Initio MD Timescales (&lt; 10–100 ps)</text>
+          <text x="495" y="144" font-size="11" fill="#475569">Cannot observe rare events (diffusion, nucleation, catalysis).</text>
+          <text x="482" y="172" font-size="12" font-weight="600" fill="#0f172a">3. Cheap XC Functionals (LDA / PBE instead of Hybrid/CCSD(T))</text>
+          <text x="495" y="190" font-size="11" fill="#475569">Underestimates bandgaps by 30–50%, fails on strong correlation.</text>
+          <text x="482" y="214" font-size="11.5" font-weight="700" fill="#b45309">&rarr; AI4S targets a 100×–10,000× speedup to break these walls.</text>
+        </svg>
+        <div class="diagram-caption">Figure 1.3: The $O(N^3)$ and $O(N^7)$ scaling walls force researchers into severe physical compromises: small periodic cells, picosecond trajectories, and inaccurate approximate functionals.</div>
+      </div>
+    </section>
+
+    <div class="page-nav">
+      <a href="1.2_classical_methods_and_bottlenecks.html">&larr; 1.2 Classical Methods &amp; Bottlenecks</a>
+      <a href="../2_ai4s_methods/2.1_landscape_overview.html">2.1 AI4S Landscape Overview &rarr;</a>
+    </div>
+  </div>
+</body>
+</html>

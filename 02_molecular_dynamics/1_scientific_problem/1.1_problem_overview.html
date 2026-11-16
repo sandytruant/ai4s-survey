@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2.1.1 Problem Overview — Molecular Dynamics | AI4S Survey</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script type="module" src="../../assets/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 2: Molecular Dynamics</span> &rsaquo;
+    <strong>1.1 Problem Overview</strong>
+  </nav>
+
+  <header class="hero">
+    <h1>1.1 Problem Overview: Molecular Dynamics (MD)</h1>
+    <p class="subtitle">Simulating atomic trajectories via Newton's equations: from femtosecond bond vibrations to microsecond biological &amp; materials phenomena.</p>
+  </header>
+
+  <div class="section-card">
+    <h2>What Is Molecular Dynamics? (A Computer Scientist's View)</h2>
+    <p>
+      At its core, <strong>Molecular Dynamics (MD)</strong> is a discrete-time $N$-body particle simulation. Given $N$ atoms with positions $\mathbf{R} = \{\mathbf{r}_1, \dots, \mathbf{r}_N\} \in \mathbb{R}^{N \times 3}$ and velocities $\mathbf{V} = \{\mathbf{v}_1, \dots, \mathbf{v}_N\}$, MD advances the system step-by-step in time by computing the force on every atom as the negative gradient of a scalar potential energy surface $E(\mathbf{R})$:
+    </p>
+    <div class="equation-box">
+      $$\mathbf{F}_i(t) = -\nabla_{\mathbf{r}_i} E(\mathbf{R}(t)), \qquad m_i \frac{d^2 \mathbf{r}_i}{dt^2} = \mathbf{F}_i(t)$$
+    </div>
+    <p>
+      To preserve energy and time-reversibility (symplectic integration), MD uses the <strong>Velocity Verlet</strong> algorithm with a tiny timestep $\Delta t \approx 1\text{ fs}$ ($10^{-15}\text{ s}$)—dictated by the fastest physical motion (C–H or O–H bond stretching at $\sim 10\text{ fs}$ periods):
+    </p>
+    <div class="equation-box">
+      $$\mathbf{r}_i(t+\Delta t) = \mathbf{r}_i(t) + \mathbf{v}_i(t)\Delta t + \frac{\mathbf{F}_i(t)}{2m_i}\Delta t^2, \qquad \mathbf{v}_i(t+\Delta t) = \mathbf{v}_i(t) + \frac{\mathbf{F}_i(t) + \mathbf{F}_i(t+\Delta t)}{2m_i}\Delta t$$
+    </div>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 220" width="820" height="220" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+        <!-- Step 1 -->
+        <rect x="20" y="35" width="165" height="75" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="102" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">1. Neighbor Search</text>
+        <text x="102" y="80" text-anchor="middle" font-size="11" fill="#475569">Verlet / Cell List</text>
+        <text x="102" y="96" text-anchor="middle" font-size="11" fill="#0d9488">Cutoff r_c (5–12 Å)</text>
+
+        <line x1="185" y1="72" x2="225" y2="72" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Step 2 -->
+        <rect x="230" y="35" width="185" height="75" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+        <text x="322" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">2. Force Evaluation</text>
+        <text x="322" y="80" text-anchor="middle" font-size="11" fill="#475569">F_i = -∇_i E(R)</text>
+        <text x="322" y="96" text-anchor="middle" font-size="11" fill="#2563eb">90–99.9% of Runtime</text>
+
+        <line x1="415" y1="72" x2="455" y2="72" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Step 3 -->
+        <rect x="460" y="35" width="165" height="75" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="542" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">3. Velocity Verlet</text>
+        <text x="542" y="80" text-anchor="middle" font-size="11" fill="#475569">Update r_i, v_i</text>
+        <text x="542" y="96" text-anchor="middle" font-size="11" fill="#0d9488">Δt ≈ 1 fs (O(N) FLOPs)</text>
+
+        <line x1="625" y1="72" x2="665" y2="72" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Step 4 -->
+        <rect x="670" y="35" width="130" height="75" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="735" y="60" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">4. Ensemble</text>
+        <text x="735" y="80" text-anchor="middle" font-size="11" fill="#475569">Thermostat / Barostat</text>
+        <text x="735" y="96" text-anchor="middle" font-size="11" fill="#0d9488">PBC Wrapping</text>
+
+        <!-- Loop back -->
+        <path d="M 735 110 L 735 160 L 102 160 L 102 114" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+        <rect x="260" y="144" width="300" height="30" rx="15" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+        <text x="410" y="164" text-anchor="middle" font-size="12" font-weight="600" fill="#92400e">Sequential Time Loop: 10⁶ to 10⁹ Iterations (No Time-Parallelism)</text>
+      </svg>
+      <div class="diagram-caption">Figure 1: The canonical MD time-integration loop. Force evaluation dominates compute, while sequential data dependencies force strict step-by-step execution.</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>Spatial Locality: Cutoff Radius &amp; Neighbor Lists</h2>
+    <p>
+      Evaluating all $O(N^2)$ pairwise interactions is prohibitive for large $N$. Because short-range chemical bonds and van der Waals forces decay rapidly, MD introduces a spherical <strong>cutoff radius $r_c$</strong> (typically $5\text{–}12\text{ \AA}$) around each atom $i$. Only neighbors $j \in \mathcal{N}(i)$ within $r_c$ contribute to short-range forces, reducing complexity from $O(N^2)$ to $O(N \cdot \bar{d})$, where $\bar{d} \approx 20\text{–}100$ is the average neighbor degree.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 760 220" width="760" height="220" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">
+        <!-- Left: Cutoff sphere -->
+        <rect x="20" y="15" width="340" height="190" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+        <circle cx="190" cy="110" r="78" fill="#eff6ff" stroke="#2563eb" stroke-width="2" stroke-dasharray="5,4"/>
+        <circle cx="190" cy="110" r="9" fill="#2563eb"/>
+        <text x="190" y="132" text-anchor="middle" font-size="11" font-weight="700" fill="#1e40af">Atom i</text>
+        <!-- Inside cutoff -->
+        <circle cx="145" cy="85" r="6" fill="#0d9488"/>
+        <circle cx="225" cy="75" r="6" fill="#0d9488"/>
+        <circle cx="235" cy="135" r="6" fill="#0d9488"/>
+        <circle cx="160" cy="150" r="6" fill="#0d9488"/>
+        <line x1="190" y1="110" x2="145" y2="85" stroke="#0d9488" stroke-width="1.5"/>
+        <line x1="190" y1="110" x2="225" y2="75" stroke="#0d9488" stroke-width="1.5"/>
+        <line x1="190" y1="110" x2="235" y2="135" stroke="#0d9488" stroke-width="1.5"/>
+        <line x1="190" y1="110" x2="160" y2="150" stroke="#0d9488" stroke-width="1.5"/>
+        <!-- Radius label -->
+        <line x1="190" y1="110" x2="268" y2="110" stroke="#2563eb" stroke-width="1.5"/>
+        <text x="235" y="104" font-size="11" font-weight="700" fill="#2563eb">r_c</text>
+        <!-- Outside cutoff -->
+        <circle cx="70" cy="55" r="6" fill="#94a3b8"/>
+        <circle cx="305" cy="165" r="6" fill="#94a3b8"/>
+        <text x="190" y="196" text-anchor="middle" font-size="11" fill="#475569">Dynamic Sparse Graph: Edges change every ~10–20 steps</text>
+
+        <!-- Right: CSR / Neighbor List -->
+        <rect x="390" y="15" width="350" height="190" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+        <text x="565" y="40" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Hardware Data Structure: Verlet / CSR List</text>
+        <text x="415" y="68" font-size="12" font-weight="600" fill="#0f172a">Atom Offsets:</text>
+        <rect x="520" y="52" width="35" height="24" fill="#f1f5f9" stroke="#94a3b8"/><text x="537" y="68" text-anchor="middle" font-size="11">0</text>
+        <rect x="555" y="52" width="35" height="24" fill="#f1f5f9" stroke="#94a3b8"/><text x="572" y="68" text-anchor="middle" font-size="11">4</text>
+        <rect x="590" y="52" width="35" height="24" fill="#f1f5f9" stroke="#94a3b8"/><text x="607" y="68" text-anchor="middle" font-size="11">9</text>
+        <rect x="625" y="52" width="35" height="24" fill="#f1f5f9" stroke="#94a3b8"/><text x="642" y="68" text-anchor="middle" font-size="11">...</text>
+
+        <text x="415" y="110" font-size="12" font-weight="600" fill="#0f172a">Neighbor IDs:</text>
+        <rect x="520" y="94" width="35" height="24" fill="#f0fdfa" stroke="#0d9488"/><text x="537" y="110" text-anchor="middle" font-size="11">12</text>
+        <rect x="555" y="94" width="35" height="24" fill="#f0fdfa" stroke="#0d9488"/><text x="572" y="110" text-anchor="middle" font-size="11">47</text>
+        <rect x="590" y="94" width="35" height="24" fill="#f0fdfa" stroke="#0d9488"/><text x="607" y="110" text-anchor="middle" font-size="11">83</text>
+        <rect x="625" y="94" width="35" height="24" fill="#f0fdfa" stroke="#0d9488"/><text x="642" y="110" text-anchor="middle" font-size="11">91</text>
+        <rect x="660" y="94" width="35" height="24" fill="#eff6ff" stroke="#2563eb"/><text x="677" y="110" text-anchor="middle" font-size="11">5</text>
+
+        <text x="565" y="150" text-anchor="middle" font-size="11" fill="#dc2626" font-weight="600">Irregular Gather: R[j] non-contiguous in DRAM</text>
+        <text x="565" y="172" text-anchor="middle" font-size="11" fill="#475569">Periodic Boundary Conditions (PBC) wrap coordinates</text>
+        <text x="565" y="188" text-anchor="middle" font-size="11" fill="#475569">via minimum-image convention across box walls.</text>
+      </svg>
+      <div class="diagram-caption">Figure 2: Cutoff radius $r_c$ induces a dynamic 3D spatial graph stored in Compressed Sparse Row (CSR) or padded Verlet neighbor lists.</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>Representative Real-World Use Cases</h2>
+    <div class="grid-3">
+      <div class="callout">
+        <strong>Drug Discovery &amp; Biophysics</strong>
+        <p>Simulating a protein (~$10^4\text{–}10^5$ atoms) solvated in an explicit water box to observe ligand binding, allosteric conformational changes, and protein folding over $1\text{–}100\,\mu\text{s}$ ($10^9\text{–}10^{11}$ steps).</p>
+      </div>
+      <div class="callout nonai">
+        <strong>Battery &amp; Solid Electrolytes</strong>
+        <p>Tracking $\text{Li}^+$ ion hopping and diffusion coefficients in solid-state electrolytes (e.g., $\text{Li}_{10}\text{GeP}_2\text{S}_{12}$) or SEI formation at electrode interfaces, requiring reactive bond-breaking accuracy.</p>
+      </div>
+      <div class="callout warn">
+        <strong>Materials Fracture &amp; Phase Transitions</strong>
+        <p>Modeling crack propagation, dislocation glide, or crystal nucleation across $10^6\text{–}10^8$ atoms where mesoscale defects interact with atomistic bond breaking.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-nav">
+    <a href="../../index.html">&larr; AI4S Survey Home</a>
+    <a href="1.2_classical_methods_and_bottlenecks.html">1.2 Classical Methods &amp; Bottlenecks &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

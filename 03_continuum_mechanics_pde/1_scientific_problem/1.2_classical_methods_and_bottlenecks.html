@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.2 Classical Methods &amp; Bottlenecks — Continuum Mechanics PDEs</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <script type="module" src="../../assets/app.js"></script>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 3: Continuum Mechanics PDEs</span> &rsaquo;
+    <span>1.2 Classical Methods &amp; Bottlenecks</span>
+  </nav>
+
+  <header class="hero">
+    <h1>1.2 Classical PDE Solvers &amp; Architectural Bottlenecks</h1>
+    <p class="subtitle">Why FDM, FVM, FEM, and Spectral solvers hit the memory wall, synchronization wall, and CFL time-step barrier.</p>
+  </header>
+
+  <section class="section-card">
+    <h2>Four Classical Discretization Paradigms</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Discretization</th>
+          <th>Core Compute Kernel</th>
+          <th>Primary Hardware Bottleneck</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Finite Difference (FDM)</strong></td>
+          <td>Structured Cartesian grid</td>
+          <td>7-pt / 27-pt dense stencil loops</td>
+          <td>DRAM bandwidth (arithmetic intensity $\approx 0.1\text{–}0.5\text{ FLOP/B}$)</td>
+        </tr>
+        <tr>
+          <td><strong>Finite Volume (FVM)</strong></td>
+          <td>Unstructured polyhedral cells (e.g., OpenFOAM)</td>
+          <td>Face-flux loops + CSR SpMV (<code>A*x</code>)</td>
+          <td>Indirect gather-scatter memory access, low cache reuse</td>
+        </tr>
+        <tr>
+          <td><strong>Finite Element (FEM)</strong></td>
+          <td>Unstructured elements + basis functions</td>
+          <td>Element-matrix assembly + global sparse solve</td>
+          <td>Irregular scatter-add during assembly; ill-conditioned SpMV</td>
+        </tr>
+        <tr>
+          <td><strong>Spectral Methods</strong></td>
+          <td>Global Fourier / Chebyshev basis</td>
+          <td>3D FFT / iFFT + pointwise mode ops</td>
+          <td>All-to-all transpose communication across nodes/GPUs</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section-card">
+    <h2>Architectural &amp; Compiler Bottlenecks</h2>
+    <p>
+      Classical PDE solvers are among the lowest arithmetic-intensity workloads in HPC. On modern GPUs (e.g., NVIDIA H100 with ~67 TFLOP/s FP64 and ~3.35 TB/s HBM3, ridge point $\approx 20\text{ FLOP/B}$), a sparse matrix-vector multiply (SpMV) or 7-point stencil achieves less than 5% of peak compute.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 270" width="820" height="270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Roofline model and iterative Krylov solver loop">
+        <!-- Left: Roofline Plot -->
+        <rect x="15" y="15" width="380" height="235" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text x="205" y="38" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Roofline: Classical PDE vs. AI Surrogate</text>
+        <!-- Axes -->
+        <line x1="65" y1="210" x2="365" y2="210" stroke="#334155" stroke-width="1.5"/>
+        <line x1="65" y1="210" x2="65" y2="55" stroke="#334155" stroke-width="1.5"/>
+        <text x="215" y="235" text-anchor="middle" font-size="11" fill="#475569">Arithmetic Intensity (FLOP / Byte)</text>
+        <text x="32" y="135" text-anchor="middle" font-size="11" fill="#475569" transform="rotate(-90 32 135)">Attainable GFLOP/s</text>
+        <!-- Roofline ceiling -->
+        <polyline points="65,195 210,75 360,75" fill="none" stroke="#0f172a" stroke-width="2.5"/>
+        <text x="285" y="68" font-size="10.5" font-weight="600" fill="#0f172a">Peak Compute (Tensor/FP64)</text>
+        <text x="115" y="122" font-size="10.5" font-weight="600" fill="#475569" transform="rotate(-39 115 122)">DRAM / HBM Bandwidth</text>
+        <!-- Classical points -->
+        <circle cx="95" cy="170" r="6" fill="#0d9488"/>
+        <text x="106" y="174" font-size="10.5" font-weight="600" fill="#0d9488">CSR SpMV (~0.25 F/B)</text>
+        <circle cx="122" cy="148" r="6" fill="#0d9488"/>
+        <text x="133" y="152" font-size="10.5" font-weight="600" fill="#0d9488">3D Stencil (~0.5 F/B)</text>
+        <!-- AI points -->
+        <circle cx="290" cy="82" r="6.5" fill="#7c3aed"/>
+        <text x="290" y="102" text-anchor="middle" font-size="10.5" font-weight="600" fill="#7c3aed">AI GEMM / Attn (&gt;50 F/B)</text>
+
+        <!-- Right: Iterative Solver Loop -->
+        <rect x="415" y="15" width="390" height="235" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+        <text x="610" y="38" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Iterative Krylov / Multigrid Loop (per Δt)</text>
+
+        <rect x="440" y="58" width="155" height="44" rx="6" fill="#f0fdfa" stroke="#0d9488"/>
+        <text x="517" y="77" text-anchor="middle" font-size="11.5" font-weight="700" fill="#115e59">1. SpMV (q = A · p)</text>
+        <text x="517" y="93" text-anchor="middle" font-size="10" fill="#475569">Indirect CSR + Halo Exchange</text>
+
+        <rect x="625" y="58" width="155" height="44" rx="6" fill="#fef2f2" stroke="#dc2626"/>
+        <text x="702" y="77" text-anchor="middle" font-size="11.5" font-weight="700" fill="#991b1b">2. Dot Product &lt;p, q&gt;</text>
+        <text x="702" y="93" text-anchor="middle" font-size="10" fill="#475569">Global MPI_Allreduce Barrier</text>
+
+        <rect x="625" y="130" width="155" height="44" rx="6" fill="#fffbeb" stroke="#d97706"/>
+        <text x="702" y="149" text-anchor="middle" font-size="11.5" font-weight="700" fill="#92400e">3. Preconditioner</text>
+        <text x="702" y="165" text-anchor="middle" font-size="10" fill="#475569">AMG V-cycle / ILU (serial dep.)</text>
+
+        <rect x="440" y="130" width="155" height="44" rx="6" fill="#eff6ff" stroke="#2563eb"/>
+        <text x="517" y="149" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1e3a8a">4. AXPY Update</text>
+        <text x="517" y="165" text-anchor="middle" font-size="10" fill="#475569">x += αp; r -= αq (BW-bound)</text>
+
+        <line x1="595" y1="80" x2="625" y2="80" stroke="#475569" stroke-width="1.5"/>
+        <line x1="702" y1="102" x2="702" y2="130" stroke="#475569" stroke-width="1.5"/>
+        <line x1="625" y1="152" x2="595" y2="152" stroke="#475569" stroke-width="1.5"/>
+        <line x1="517" y1="130" x2="517" y2="102" stroke="#475569" stroke-width="1.5"/>
+
+        <rect x="440" y="192" width="340" height="42" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+        <text x="610" y="210" text-anchor="middle" font-size="11" font-weight="600" fill="#0f172a">Repeat 50–1,000+ iterations per time step Δt</text>
+        <text x="610" y="226" text-anchor="middle" font-size="10.5" fill="#dc2626">CFL condition forces Δt &lt; Δx / |u| &rarr; 10⁴–10⁶ time steps</text>
+      </svg>
+      <p class="diagram-caption">
+        <strong>Figure 1:</strong> Left: Classical SpMV and stencil kernels sit far left on the memory-bandwidth slope of the Roofline model. Right: Each time step requires hundreds of Krylov/Multigrid iterations punctuated by global <code>Allreduce</code> barriers.
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <div class="callout warn">
+        <strong>1. Irregular Memory Access &amp; Compiler Limits</strong><br>
+        On unstructured FVM/FEM meshes, neighbor lists stored in CSR/COO format cause non-coalesced DRAM reads (<code>val[col_idx[j]]</code>). Compilers cannot statically vectorize or prefetch indirect gathers without inspector-executor reordering (e.g., Cuthill-McKee), leaving caches underutilized.
+      </div>
+      <div class="callout danger">
+        <strong>2. Global Synchronization &amp; CFL Barrier</strong><br>
+        Krylov solvers (CG, GMRES) require inner products every iteration, triggering latency-bound <code>MPI_Allreduce</code> barriers across nodes. Meanwhile, the Courant-Friedrichs-Lewy (CFL) condition ($\text{CFL} = |\mathbf{u}|\Delta t / \Delta x \le 1$) forces tiny $\Delta t$ whenever meshes are refined.
+      </div>
+    </div>
+
+    <div class="callout nonai">
+      <strong>Precision Sensitivity:</strong> Iterative linear solvers and long-horizon time integration typically require <strong>FP64 (double precision)</strong> to avoid catastrophic cancellation and preserve conservation laws—preventing direct use of low-precision FP16/FP8 Tensor Cores without mixed-precision iterative refinement.
+    </div>
+  </section>
+
+  <div class="page-nav">
+    <a href="1.1_problem_overview.html">&larr; 1.1 Problem Overview</a>
+    <a href="1.3_compute_demand_and_impact.html">1.3 Compute Demand &amp; Impact &rarr;</a>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark" />
+  <script>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark";}catch{}</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transolver &amp; Poseidon — PDE Foundation Models</title>
+  <link rel="stylesheet" href="../../../assets/style.css">
+  <script type="module" src="../../../assets/app.js"></script>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="../../../index.html">AI4S Survey</a> &rsaquo;
+    <span>Pillar 3: Continuum Mechanics PDEs</span> &rsaquo;
+    <a href="../2.1_landscape_overview.html">2.1 Landscape</a> &rsaquo;
+    <span>Transolver &amp; Poseidon</span>
+  </nav>
+
+  <header class="hero">
+    <h1>Transolver &amp; Poseidon: PDE Transformers &amp; Foundation Models</h1>
+    <p class="subtitle">Linear-complexity Physics-Attention on arbitrary meshes (Transolver) and multiscale pretrained operator transformers (Poseidon).</p>
+    <p style="margin-top:0.75rem;">
+      <span class="badge badge-ai">Physics-Attention / Foundation Model</span>
+      <a href="https://arxiv.org/abs/2402.02366" target="_blank">Transolver (arXiv:2402.02366)</a> &bull;
+      <a href="https://github.com/thuml/Transolver" target="_blank">GitHub: thuml/Transolver</a> &bull;
+      <a href="https://arxiv.org/abs/2405.19101" target="_blank">Poseidon (arXiv:2405.19101)</a> &bull;
+      <a href="https://github.com/camlab-ethz/poseidon" target="_blank">GitHub: camlab-ethz/poseidon</a>
+    </p>
+  </header>
+
+  <section class="section-card">
+    <h2>2.2.1 Overall Workflow</h2>
+    <p>
+      Standard Vision/Graph Transformers suffer from $O(N^2)$ attention complexity on $10^5$–$10^6$-cell industrial meshes. <strong>Transolver</strong> (Wu et al., ICML 2024 Spotlight) solves this via <strong>Physics-Attention</strong>: it softly assigns $N$ mesh points into $M \ll N$ learnable <em>physical-state slices</em> (e.g., boundary layer, wake, freestream), runs $O(M^2)$ self-attention among slices, and deslices back to mesh points in $O(N)$ linear time. <strong>Poseidon</strong> (Herde et al., NeurIPS 2024) scales a multiscale operator transformer (scOT) with time-conditioned layer norms across 21M–629M parameters for zero/few-shot PDE transfer.
+    </p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 220" width="820" height="220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Transolver Physics-Attention workflow">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+
+        <!-- Non-AI Mesh -->
+        <rect x="15" y="25" width="145" height="130" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="87" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#115e59">NON-AI: Mesh Input</text>
+        <text x="87" y="75" text-anchor="middle" font-size="10.5" fill="#334155">N mesh points</text>
+        <text x="87" y="93" text-anchor="middle" font-size="10.5" fill="#334155">(coords, SDF, BCs)</text>
+        <text x="87" y="111" text-anchor="middle" font-size="10.5" fill="#334155">X &isin; ℝ^[N, C]</text>
+        <text x="87" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#0d9488">No graph edges needed</text>
+
+        <line x1="160" y1="90" x2="185" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI Slice Projection -->
+        <rect x="190" y="25" width="160" height="130" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="270" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Slice Projection</text>
+        <text x="270" y="74" text-anchor="middle" font-size="10.5" fill="#334155">Softmax weights W_s</text>
+        <text x="270" y="92" text-anchor="middle" font-size="10.5" fill="#334155">Pool N pts &rarr; M slices</text>
+        <text x="270" y="110" text-anchor="middle" font-size="10.5" fill="#334155">(M ≈ 32–64 &ll; N)</text>
+        <text x="270" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#7c3aed">Dense GEMM O(N·M·C)</text>
+
+        <line x1="350" y1="90" x2="375" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI Slice Attention -->
+        <rect x="380" y="25" width="150" height="130" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="455" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Slice Attention</text>
+        <text x="455" y="74" text-anchor="middle" font-size="10.5" fill="#334155">Multi-Head Attn over</text>
+        <text x="455" y="92" text-anchor="middle" font-size="10.5" fill="#334155">M physical tokens</text>
+        <text x="455" y="110" text-anchor="middle" font-size="10.5" fill="#334155">O(M²·C) ≈ O(1) vs N</text>
+        <text x="455" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#7c3aed">Tensor-Core GEMM</text>
+
+        <line x1="530" y1="90" x2="555" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- AI Deslice & FFN -->
+        <rect x="560" y="25" width="130" height="130" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+        <text x="625" y="48" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5b21b6">AI: Deslice + FFN</text>
+        <text x="625" y="76" text-anchor="middle" font-size="10.5" fill="#334155">Broadcast M &rarr; N</text>
+        <text x="625" y="94" text-anchor="middle" font-size="10.5" fill="#334155">via W_s^T + MLP</text>
+        <text x="625" y="138" text-anchor="middle" font-size="10" font-weight="600" fill="#7c3aed">Linear O(N)</text>
+
+        <line x1="690" y1="90" x2="710" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+        <!-- Non-AI Post -->
+        <rect x="714" y="25" width="92" height="130" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+        <text x="760" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#115e59">NON-AI</text>
+        <text x="760" y="78" text-anchor="middle" font-size="10" fill="#334155">Surface</text>
+        <text x="760" y="94" text-anchor="middle" font-size="10" fill="#334155">pressure</text>
+        <text x="760" y="110" text-anchor="middle" font-size="10" fill="#334155">&amp; drag</text>
+        <text x="760" y="138" text-anchor="middle" font-size="9.5" font-weight="600" fill="#0d9488">Signoff</text>
+
+        <!-- Legend -->
+        <rect x="230" y="185" width="14" height="14" rx="3" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.5"/>
+        <text x="250" y="196" font-size="11" fill="#334155">Non-AI Step</text>
+        <rect x="380" y="185" width="14" height="14" rx="3" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+        <text x="400" y="196" font-size="11" fill="#334155">AI Dense Tensor-Core Compute (No Irregular Scatter)</text>
+      </svg>
+      <p class="diagram-caption">
+        <strong>Figure 1:</strong> Transolver Physics-Attention. By compressing $N$ mesh points into $M$ physical-state slices, irregular graph message passing is replaced by dense Tensor-Core-friendly matrix multiplications.
+      </p>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <h2>2.2.2 Computational Profiling &amp; Bottlenecks</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Scale &amp; Complexity</th>
+          <th>Observed Efficiency &amp; Hardware Bottlenecks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Transolver</strong><br>(Wu et al., ICML 2024)</td>
+          <td>$O(N \cdot M)$ linear complexity ($M \ll N$ slices)</td>
+          <td>On Elasticity benchmarks, achieves <strong>25.6% error reduction</strong> with <strong>~5&times; fewer parameters</strong> and <strong>1.3&times; speedup</strong> over GNOT. Avoids $O(N^2)$ attention HBM explosion; follow-up <strong>Transolver++</strong> (arXiv:2502.04617) scales to <strong>million-point meshes</strong> on a single GPU.</td>
+        </tr>
+        <tr>
+          <td><strong>Poseidon</strong><br>(Herde et al., NeurIPS 2024)</td>
+          <td><strong>Poseidon-T:</strong> ~21M<br><strong>Poseidon-B:</strong> ~158M<br><strong>Poseidon-L:</strong> ~629M</td>
+          <td>Multiscale operator transformer (scOT) pretrained on large-scale fluid datasets and evaluated on 15 downstream PDE tasks. Compute profile mirrors Swin/ViT foundation models: dense QKV GEMMs + shifted-window attention, bounded by activation memory at high spatial resolutions.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section-card">
+    <h2>2.2.3 Dedicated Accelerators &amp; Compiler Stacks (Pillar 3 Synthesis)</h2>
+    <p>
+      Across both classical PDE solvers and modern AI-PDE surrogates, hardware and compiler stacks are converging on overcoming the memory wall:
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Accelerator / Stack</th>
+          <th>Target Workload</th>
+          <th>Architectural Mechanism &amp; Verified Performance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Cerebras WSE-2 / WSE-3</strong><br>(NETL WFA / CStencil)</td>
+          <td>Classical CFD stencils, field equations, &amp; AI</td>
+          <td>300mm wafer-scale processor (WSE-3: 900,000 cores, 44 GB on-chip SRAM) eliminates off-chip DRAM memory wall. NETL WFA achieved <strong>100&times;–500&times;+</strong> time-to-solution speedups over MPI supercomputers (Joule 2.0) and near real-time ~200M-cell Rayleigh-Bénard convection; CStencil/StencilPy achieved <strong>95&times;–342&times;</strong> over single-precision H100 stencil solvers.</td>
+        </tr>
+        <tr>
+          <td><strong>NVIDIA PhysicsNeMo + Warp + cuFFTDx</strong></td>
+          <td>PINNs, FNO, Transolver, FEM</td>
+          <td>Python-to-CUDA JIT compilation (<code>warp.fem</code>), device-side FFT fusion (<code>cuFFTDx</code>), <code>torch.compile</code>, and <code>ShardTensor</code> multi-GPU domain parallelism.</td>
+        </tr>
+        <tr>
+          <td><strong>GPU Tensor Cores (FP8 / BF16 / TF32)</strong></td>
+          <td>Transolver, Poseidon, FNO $W$</td>
+          <td>Dense slice-attention GEMMs and MLP layers saturate Tensor Cores, unlike FP64-bound classical SpMV.</td>
+        </tr>
+        <tr>
+          <td><strong>JAX / XLA &amp; OpenAI Triton</strong></td>
+          <td>PINN autograd &amp; GNN scatter</td>
+          <td>Whole-graph operator fusion eliminates HBM round-trips for 2nd-order AD and fused graph scatter-gather.</td>
+        </tr>
+        <tr>
+          <td><strong>FPGA / CGRA Stencil &amp; FFT</strong></td>
+          <td>Embedded FDTD / Heat / FNO</td>
+          <td>On-chip shift-register line buffers and spatial dataflow pipelines keep halo/butterfly data off DRAM.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="page-nav">
+    <a href="meshgraphnets.html">&larr; 2.2.3 MeshGraphNets</a>
+    <a href="../../../index.html">Survey Home &rarr;</a>
+  </div>
+</div>
+</body>
+</html>
